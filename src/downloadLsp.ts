@@ -47,7 +47,7 @@ function readManifest(): TishLspManifest {
     tishLsp?: Partial<TishLspManifest>;
   };
   return {
-    downloadRepo: pkg.tishLsp?.downloadRepo ?? "tish-lang/tish",
+    downloadRepo: pkg.tishLsp?.downloadRepo ?? "tishlang/tish",
     releaseTag: pkg.tishLsp?.releaseTag ?? "v0.1.0",
   };
 }

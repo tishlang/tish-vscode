@@ -4,18 +4,18 @@
   "description": "Language support for Tish — syntax highlighting, snippets, tasks; language server downloaded from Tish releases.",
   "version": "0.1.0",
   "tishLsp": {
-    "downloadRepo": "tish-lang/tish",
+    "downloadRepo": "tishlang/tish",
     "releaseTag": "v0.1.0"
   },
-  "publisher": "tish-lang",
+  "publisher": "tishlang",
   "license": "PIF",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tish-lang/tish-vscode"
+    "url": "https://github.com/tishlang/tish-vscode"
   },
-  "homepage": "https://tish-lang.github.io/tish-docs/",
+  "homepage": "https://tishlang.github.io/tish-docs/",
   "bugs": {
-    "url": "https://github.com/tish-lang/tish/issues"
+    "url": "https://github.com/tishlang/tish/issues"
   },
   "engines": {
     "vscode": "^1.85.0"

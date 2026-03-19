@@ -1,6 +1,6 @@
 # Tish — VS Code / Cursor extension
 
-Syntax highlighting, snippets, **tish-lsp** (downloaded automatically), and build tasks for the [Tish](https://github.com/tish-lang/tish) language.
+Syntax highlighting, snippets, **tish-lsp** (downloaded automatically), and build tasks for the [Tish](https://github.com/tishlang/tish) language.
 
 ## Features
 
@@ -53,7 +53,7 @@ Optionally turn off **`tish.languageServerDownload.enable`** so it doesn’t ret
 
 ## Documentation
 
-**[Tish docs — Editor & IDE](https://tish-lang.github.io/tish-docs/getting-started/editor/)**
+**[Tish docs — Editor & IDE](https://tishlang.github.io/tish-docs/getting-started/editor/)**
 
 ## Tasks (workspace)
 
