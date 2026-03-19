@@ -19,7 +19,7 @@
     {
       "label": "tish: run current file (example)",
       "type": "shell",
-      "command": "zectre",
+      "command": "tish",
       "args": ["run", "${file}"],
       "group": "test",
       "problemMatcher": []
@@ -27,7 +27,7 @@
     {
       "label": "tish: compile native (example)",
       "type": "shell",
-      "command": "zectre",
+      "command": "tish",
       "args": ["compile", "${file}", "--output", "${workspaceFolder}/tish_out", "--target", "native"],
       "group": "build",
       "problemMatcher": ["$tish-rustc"]

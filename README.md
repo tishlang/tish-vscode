@@ -66,7 +66,7 @@ Add to `.vscode/tasks.json`:
     {
       "label": "tish: run current file",
       "type": "shell",
-      "command": "zectre",
+      "command": "tish",
       "args": ["run", "${file}"],
       "group": "test",
       "problemMatcher": []
@@ -74,7 +74,7 @@ Add to `.vscode/tasks.json`:
     {
       "label": "tish: compile (native)",
       "type": "shell",
-      "command": "zectre",
+      "command": "tish",
       "args": ["compile", "${file}", "--output", "${workspaceFolder}/tish_out", "--target", "native"],
       "group": "build",
       "problemMatcher": ["$tish-rustc"]
