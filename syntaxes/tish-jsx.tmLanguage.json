@@ -1,0 +1,117 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Tish JSX",
+  "scopeName": "source.tish.jsx",
+  "patterns": [
+    { "include": "#jsx" },
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#template" },
+    { "include": "#keywords" },
+    { "include": "#numbers" },
+    { "include": "#types" }
+  ],
+  "repository": {
+    "jsx": {
+      "patterns": [
+        {
+          "begin": "(<)(/?)([a-zA-Z_][a-zA-Z0-9_.-]*)",
+          "end": "(/?>)",
+          "captures": {
+            "1": { "name": "punctuation.definition.tag.begin.tish" },
+            "2": { "name": "punctuation.definition.tag.begin.tish" },
+            "3": { "name": "entity.name.tag.tish" }
+          },
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.tag.end.tish" }
+          },
+          "name": "meta.tag.tish",
+          "patterns": [
+            {
+              "name": "entity.other.attribute-name.tish",
+              "match": "\\b([a-zA-Z_][a-zA-Z0-9_-]*)\\s*(=)"
+            },
+            { "include": "#strings" },
+            { "include": "#jsx-expr" }
+          ]
+        }
+      ]
+    },
+    "jsx-expr": {
+      "patterns": [
+        {
+          "begin": "\\{",
+          "end": "\\}",
+          "name": "meta.embedded.expression.tish",
+          "patterns": [{ "include": "$self" }]
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-slash.tish", "begin": "//", "end": "$" },
+        { "name": "comment.block.tish", "begin": "/\\*", "end": "\\*/" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.tish",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "name": "constant.character.escape.tish", "match": "\\\\." }]
+        },
+        {
+          "name": "string.quoted.single.tish",
+          "begin": "'",
+          "end": "'",
+          "patterns": [{ "name": "constant.character.escape.tish", "match": "\\\\." }]
+        }
+      ]
+    },
+    "template": {
+      "patterns": [
+        {
+          "name": "string.template.tish",
+          "begin": "`",
+          "end": "`",
+          "patterns": [
+            {
+              "name": "meta.embedded.line.tish",
+              "begin": "\\$\\{",
+              "end": "\\}",
+              "patterns": [{ "include": "$self" }]
+            }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.tish",
+          "match": "\\b(if|else|while|for|do|return|break|continue|switch|case|default|throw|try|catch|finally|import|export|from|of|in|typeof|void|async|await)\\b"
+        },
+        { "name": "storage.type.function.tish", "match": "\\b(fn|function)\\b" },
+        { "name": "storage.type.tish", "match": "\\b(let|const)\\b" },
+        { "name": "constant.language.tish", "match": "\\b(true|false|null)\\b" }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.tish",
+          "match": "\\b0[xX][0-9a-fA-F]+\\b|\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "entity.name.type.tish",
+          "match": "(?<=:)\\s*\\b(number|string|boolean|null|void|any)\\b"
+        }
+      ]
+    }
+  }
+}

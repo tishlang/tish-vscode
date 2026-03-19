@@ -1,0 +1,63 @@
+# TypeScript-only CI. tish-lsp is downloaded at runtime from Tish GitHub Releases.
+
+name: VS Code extension
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish_to_marketplace:
+        description: "Publish to Marketplace (needs VSCE_PAT)"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & package VSIX
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run compile
+      - run: npx --yes @vscode/vsce@3 package --out tish.vsix
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tish-vsix
+          path: tish.vsix
+          if-no-files-found: error
+
+  publish:
+    name: Publish to Marketplace
+    needs: build
+    if: >
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_to_marketplace == 'yes')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run compile
+      - name: Publish
+        run: npx --yes @vscode/vsce@3 publish -p "$VSCE_PAT"
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

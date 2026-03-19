@@ -1,0 +1,172 @@
+{
+  "name": "tish",
+  "displayName": "Tish",
+  "description": "Language support for Tish — syntax highlighting, snippets, tasks; language server downloaded from Tish releases.",
+  "version": "0.1.0",
+  "tishLsp": {
+    "downloadRepo": "tish-lang/tish",
+    "releaseTag": "v0.1.0"
+  },
+  "publisher": "tish-lang",
+  "license": "PIF",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tish-lang/tish-vscode"
+  },
+  "homepage": "https://tish-lang.github.io/tish-docs/",
+  "bugs": {
+    "url": "https://github.com/tish-lang/tish/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "keywords": [
+    "tish",
+    "javascript",
+    "native"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:tish",
+    "onLanguage:tish-jsx",
+    "workspaceContains:**/*.tish"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "tish",
+        "aliases": [
+          "Tish",
+          "tish"
+        ],
+        "extensions": [
+          ".tish"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "tish-jsx",
+        "aliases": [
+          "Tish JSX"
+        ],
+        "extensions": [
+          ".tishx"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "tish",
+        "scopeName": "source.tish",
+        "path": "./syntaxes/tish.tmLanguage.json"
+      },
+      {
+        "language": "tish-jsx",
+        "scopeName": "source.tish.jsx",
+        "path": "./syntaxes/tish-jsx.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "tish",
+        "path": "./snippets/tish.json"
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "tish-compile",
+        "owner": "tish",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      {
+        "name": "tish-rustc",
+        "owner": "rustc",
+        "source": "rustc",
+        "fileLocation": "autoDetect",
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning)(\\[E\\d+\\])?:\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 6
+        }
+      }
+    ],
+    "configuration": {
+      "title": "Tish",
+      "properties": {
+        "tish.languageServerPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to tish-lsp executable. Overrides download and PATH."
+        },
+        "tish.languageServerDownload.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Download tish-lsp from GitHub Releases on first use (cached under global storage)."
+        },
+        "tish.languageServerDownload.repo": {
+          "type": "string",
+          "default": "",
+          "description": "GitHub repo owner/name for binaries (default: value from extension package.json tishLsp.downloadRepo)."
+        },
+        "tish.languageServerDownload.releaseTag": {
+          "type": "string",
+          "default": "",
+          "description": "Release tag to download (default: package.json tishLsp.releaseTag)."
+        },
+        "tish.languageServerDownload.url": {
+          "type": "string",
+          "default": "",
+          "description": "Full URL to tish-lsp binary (overrides repo/tag asset lookup)."
+        },
+        "tish.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace LSP communication (Output → Tish Language Server)."
+        },
+        "tish.format.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable format-on-save via tish-lsp (formatter runs inside the server)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package:vsix": "npx --yes @vscode/vsce@3 package --out tish.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "Function": {
+    "prefix": "fn",
+    "body": ["fn ${1:name}(${2:args}) {", "\t$0", "}"],
+    "description": "Function declaration"
+  },
+  "Async function": {
+    "prefix": "afn",
+    "body": ["async fn ${1:name}(${2:args}) {", "\t$0", "}"],
+    "description": "Async function"
+  },
+  "Arrow-style expr fn": {
+    "prefix": "fn=",
+    "body": ["fn ${1:name}(${2:x}) = ${3:expr}"],
+    "description": "Single-expression function"
+  },
+  "For-of": {
+    "prefix": "forof",
+    "body": ["for (let ${1:x} of ${2:iterable}) {", "\t$0", "}"],
+    "description": "For-of loop"
+  },
+  "For C-style": {
+    "prefix": "for",
+    "body": ["for (let ${1:i} = 0; ${1:i} < ${2:n}; ${1:i} = ${1:i} + 1) {", "\t$0", "}"],
+    "description": "C-style for loop"
+  },
+  "If": {
+    "prefix": "if",
+    "body": ["if (${1:cond}) {", "\t$0", "}"],
+    "description": "If statement"
+  },
+  "Try/catch": {
+    "prefix": "try",
+    "body": ["try {", "\t$1", "} catch (${2:e}) {", "\t$0", "}"],
+    "description": "Try/catch"
+  },
+  "Import": {
+    "prefix": "imp",
+    "body": ["import { $2 } from '${1:./module.tish}'"],
+    "description": "Named import"
+  },
+  "Let": {
+    "prefix": "let",
+    "body": ["let ${1:name} = $0"],
+    "description": "Let binding"
+  },
+  "Const": {
+    "prefix": "const",
+    "body": ["const ${1:name} = $0"],
+    "description": "Const binding"
+  },
+  "While": {
+    "prefix": "while",
+    "body": ["while (${1:cond}) {", "\t$0", "}"],
+    "description": "While loop"
+  },
+  "Switch": {
+    "prefix": "switch",
+    "body": ["switch (${1:expr}) {", "\tcase ${2:value}:", "\t\t$0", "\t\tbreak", "\tdefault:", "\t\tbreak", "}"],
+    "description": "Switch statement"
+  }
+}
