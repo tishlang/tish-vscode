@@ -136,7 +136,7 @@ jobs:
 
   prerelease:
     name: Create/update prerelease
-    needs: [build, release_check]
+    needs: [version, build, release_check]
     if: >
       always() && needs.build.result == 'success' && needs.release_check.result == 'success' &&
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
@@ -153,6 +153,10 @@ jobs:
         id: version
         run: |
           V="${{ needs.version.outputs.version }}"
+          if [ -z "$V" ]; then
+            echo "::error::Version is empty. Check that the version job ran and semantic-release or package.json produced a valid version."
+            exit 1
+          fi
           echo "version=$V" >> $GITHUB_OUTPUT
           echo "Tag: v$V"
 
