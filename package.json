@@ -7,7 +7,7 @@
     "downloadRepo": "tishlang/tish",
     "releaseTag": "v0.1.0"
   },
-  "publisher": "tishlang",
+  "publisher": "tish",
   "license": "PIF",
   "repository": {
     "type": "git",
