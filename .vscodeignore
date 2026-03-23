@@ -6,3 +6,8 @@ tsconfig.json
 .gitignore
 **/.DS_Store
 node_modules/**
+.releaserc.json
+.github/**
+docs/**
+scripts/**
+*.vsix

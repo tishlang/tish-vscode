@@ -1,6 +1,6 @@
 {
-  "name": "tish",
-  "displayName": "Tish",
+  "name": "tish-vscode",
+  "displayName": "Tish Vscode",
   "description": "Language support for Tish — syntax highlighting, snippets, tasks; language server downloaded from Tish releases.",
   "version": "0.1.0",
   "tishLsp": {
@@ -13,9 +13,9 @@
     "type": "git",
     "url": "https://github.com/tishlang/tish-vscode"
   },
-  "homepage": "https://tishlang.github.io/tish-docs/",
+  "homepage": "https://tishlang.com",
   "bugs": {
-    "url": "https://github.com/tishlang/tish/issues"
+    "url": "https://github.com/tishlang/tish-vscode/issues"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -29,7 +29,7 @@
     "javascript",
     "native"
   ],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:tish",
     "onLanguage:tish-jsx",
@@ -162,8 +162,12 @@
     "package:vsix": "npx --yes @vscode/vsce@3 package --out tish.vsix"
   },
   "devDependencies": {
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/npm": "^13.1.5",
+    "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/node": "^20.10.0",
     "@types/vscode": "^1.85.0",
+    "semantic-release": "^25.0.3",
     "typescript": "^5.3.0"
   },
   "dependencies": {
