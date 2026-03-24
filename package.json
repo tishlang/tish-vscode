@@ -1,6 +1,6 @@
 {
   "name": "tish-vscode",
-  "displayName": "Tish Vscode",
+  "displayName": "Tish",
   "description": "Language support for Tish — syntax highlighting, snippets, tasks; language server downloaded from Tish releases.",
   "version": "0.1.0",
   "tishLsp": {
