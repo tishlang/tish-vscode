@@ -1,14 +1,13 @@
-# Same pattern as tish: semantic-release drives version on main, prerelease on merge, Marketplace on promote.
+# Build, test, and on main push create prerelease with VSIX. Mirrors tish build-npm-binaries.yml.
+# Separate vscode-release.yml publishes to Marketplace when prerelease is promoted.
 
-name: VS Code extension
+name: CI (compile, build, prerelease)
 
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  release:
-    types: [published, edited]
   workflow_dispatch:
 
 permissions:
@@ -16,7 +15,7 @@ permissions:
 
 jobs:
   version:
-    name: Get version (semantic-release dry-run on main)
+    name: Get version
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set_version.outputs.version }}
@@ -49,10 +48,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VER=""
-          if { [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; } && \
-             { [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; }; then
-            npx semantic-release --dry-run 2>&1 | tee semantic-release.log
-            VER=$(sed -n 's/.*Published release \([0-9.]*\).*/\1/p' semantic-release.log | head -1)
+          if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              npx semantic-release --dry-run 2>&1 | tee semantic-release.log
+              VER=$(sed -n 's/.*Published release \([0-9.]*\).*/\1/p' semantic-release.log | head -1)
+            fi
           fi
           if [ -z "$VER" ]; then
             VER=$(node -p "require('./package.json').version")
@@ -64,9 +64,7 @@ jobs:
 
   release_check:
     name: Release check (semantic-release dry-run)
-    if: >
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +95,7 @@ jobs:
         run: |
           npx semantic-release --dry-run 2>&1 | tee release-check.log
           if grep -q "There are no relevant changes, so no new version is released." release-check.log; then
-            echo "No incremental release would be triggered. Use feat/fix/perf/BREAKING CHANGE (conventional commits) before merging to main."
+            echo "::error::No incremental release would be triggered. Push commits that trigger a release (feat/fix/perf/BREAKING CHANGE per conventional commits)."
             exit 1
           fi
           echo "Release would be triggered — check passed."
@@ -126,6 +124,7 @@ jobs:
           "
         env:
           VERSION: ${{ needs.version.outputs.version }}
+
       - run: npm run compile
       - run: npx --yes @vscode/vsce@3 package --out tish.vsix
       - uses: actions/upload-artifact@v4
@@ -134,13 +133,10 @@ jobs:
           path: tish.vsix
           if-no-files-found: error
 
-  prerelease:
-    name: Create/update prerelease
-    needs: [version, build, release_check]
-    if: >
-      always() && needs.build.result == 'success' && needs.release_check.result == 'success' &&
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+  release:
+    name: Release (prerelease via GitHub API)
+    needs: [build, release_check]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -149,24 +145,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Version for GitHub release tag
-        id: version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Set repository URL (fork-friendly)
         run: |
-          V="${{ needs.version.outputs.version }}"
-          if [ -z "$V" ]; then
-            echo "::error::Version is empty. Check that the version job ran and semantic-release or package.json produced a valid version."
+          node -e "
+          const fs = require('fs');
+          const p = require('./package.json');
+          p.repository = { type: 'git', url: process.env.REPO_URL };
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          "
+        env:
+          REPO_URL: ${{ format('{0}/{1}.git', github.server_url, github.repository) }}
+
+      - name: Get next version (semantic-release dry-run)
+        id: next_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release --dry-run 2>&1 | tee release.log
+          VERSION=$(sed -n 's/.*Published release \([0-9.]*\).*/\1/p' release.log | head -1)
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not determine next version from semantic-release output"
             exit 1
           fi
-          echo "version=$V" >> $GITHUB_OUTPUT
-          echo "Tag: v$V"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Next version: $VERSION"
 
       - name: Download VSIX
         uses: actions/download-artifact@v4
         with:
           name: tish-vsix
 
-      - name: Generate release notes
-        id: changelog
+      - name: Generate release notes from commits
         run: |
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -n "$LAST_TAG" ]; then
@@ -182,11 +198,11 @@ jobs:
             echo ""
           } > release-body.md
 
-      - name: Create or update prerelease via API
+      - name: Create or update GitHub prerelease via API
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ steps.next_version.outputs.version }}
         run: |
           TAG="v${VERSION}"
           BODY=$(cat release-body.md)
@@ -195,7 +211,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${{ github.repository }}/releases" \
-            -d "{\"tag_name\":\"$TAG\",\"target_commitish\":\"${{ github.sha }}\",\"name\":\"$TAG (prerelease)\",\"body\":$(echo "$BODY" | jq -Rs .),\"prerelease\":true}")
+            -d "{\"tag_name\":\"$TAG\",\"target_commitish\":\"${{ github.sha }}\",\"name\":\"$TAG\",\"body\":$(echo "$BODY" | jq -Rs .),\"prerelease\":true}")
           HTTP_CODE=$(echo "$RESP" | tail -n1)
           BODY_RESP=$(echo "$RESP" | sed '$d')
           if [ "$HTTP_CODE" = "201" ]; then
@@ -217,13 +233,13 @@ jobs:
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID" \
                 -d "{\"target_commitish\":\"${{ github.sha }}\",\"body\":$(echo "$BODY" | jq -Rs .),\"prerelease\":true}"
-              echo "Updated prerelease $TAG"
+              echo "Updated existing prerelease $TAG"
             else
-              echo "Release creation failed (422) and could not find release by tag"
+              echo "::error::Release creation failed (422) and could not find release by tag"
               exit 1
             fi
           else
-            echo "Unexpected response: $HTTP_CODE"
+            echo "::error::Unexpected response: $HTTP_CODE"
             echo "$BODY_RESP"
             exit 1
           fi
@@ -249,24 +265,3 @@ jobs:
             -H "Content-Type: application/octet-stream" \
             --data-binary @tish.vsix \
             "${UPLOAD_URL}?name=tish.vsix"
-
-  publish:
-    name: Publish to Marketplace
-    if: github.event_name == 'release' && github.event.release.prerelease == false
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download VSIX from release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ASSET_URL=$(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | select(.name == "tish.vsix") | .url')
-          if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then
-            echo "::error::Release has no asset tish.vsix. Promote the prerelease (created on main merge) to full release."
-            exit 1
-          fi
-          curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/octet-stream" "$ASSET_URL" -o tish.vsix
-
-      - name: Publish to VS Code Marketplace
-        run: npx --yes @vscode/vsce@3 publish -p "$VSCE_PAT" --packagePath tish.vsix
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}

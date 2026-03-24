@@ -1,0 +1,30 @@
+# Publish to VS Code Marketplace when a GitHub release is promoted from prerelease to full release.
+# Downloads the VSIX from the release (no rebuild). Mirrors tish npm-release.yml.
+
+name: VS Code release
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  publish:
+    name: Publish to VS Code Marketplace
+    if: github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download VSIX from release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ASSET_URL=$(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | select(.name == "tish.vsix") | .url')
+          if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then
+            echo "::error::Release has no asset tish.vsix. Promote the prerelease (created on main merge by CI workflow) to full release."
+            exit 1
+          fi
+          curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/octet-stream" "$ASSET_URL" -o tish.vsix
+
+      - name: Publish to VS Code Marketplace
+        run: npx --yes @vscode/vsce@3 publish -p "$VSCE_PAT" --packagePath tish.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

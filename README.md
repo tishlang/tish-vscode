@@ -94,16 +94,13 @@ Press **F5** for Extension Development Host. For LSP during dev, either allow do
 
 ## CI / publishing
 
-Same pattern as [tish](https://github.com/tishlang/tish): **semantic-release** (conventional commits) + prerelease + Marketplace on promote.
+Same pattern as [tish](https://github.com/tishlang/tish): two workflows (CI + release).
 
-| Piece | Behavior |
-|--------|----------|
-| **`.releaserc.json`** | `commit-analyzer`, `release-notes-generator`, `@semantic-release/npm` with `npmPublish: false` (no `@semantic-release/github` — we create the GitHub release in CI, like tish’s manual API step). |
-| **Push to `main` / `master`** | `release_check` fails if there are no releasable commits (`feat` / `fix` / `perf` / `BREAKING CHANGE`, etc.). |
-| **Version** | From `semantic-release --dry-run` (“Published release X.Y.Z”); VSIX is built with that version. |
-| **Prerelease** | GitHub **prerelease** `vX.Y.Z` + `tish.vsix` asset (updated on each qualifying merge). |
-| **Promote to release** | Uncheck “prerelease” → workflow publishes the attached VSIX to the **Marketplace** (`VSCE_PAT`). |
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| **`vscode-ci.yml`** | push/PR to main, workflow_dispatch | Build VSIX, release_check (conventional commits), create prerelease with tish.vsix. Mirrors build-npm-binaries.yml. |
+| **`vscode-release.yml`** | release published/edited | When prerelease promoted to full: download VSIX from release, publish to Marketplace. Mirrors npm-release.yml.
 
-1. **`VSCE_PAT`** — Marketplace publish. **`GITHUB_TOKEN`** — default; used by semantic-release dry-run.
-2. Keep **`package.json` `version`** in sync with the last release tag when possible; CI overwrites it for the VSIX from semantic-release’s next version.
+1. **`VSCE_PAT`** — Marketplace publish (vscode-release).
+2. **Conventional commits** — feat/fix/perf/BREAKING CHANGE required for main merge.
 3. Align **`tishLsp.releaseTag`** with Tish’s GitHub release that ships `tish-lsp` binaries.
