@@ -10,8 +10,9 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+# semantic-release --dry-run still runs verifyConditions (git push --dry-run); GITHUB_TOKEN needs contents:write.
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   version:
