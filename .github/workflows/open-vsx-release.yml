@@ -24,7 +24,13 @@ jobs:
           fi
           curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/octet-stream" "$ASSET_URL" -o tish.vsix
 
+      # GitHub secret: VSX_TOKEN. ovsx expects OVSX_PAT (we pass the same value).
       - name: Publish to Open VSX Registry
-        run: npx --yes ovsx publish tish.vsix -p "$VSX_TOKEN"
         env:
-          OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}
+          OVSX_PAT: ${{ secrets.VSX_TOKEN }}
+        run: |
+          if [ -z "$OVSX_PAT" ]; then
+            echo "::error::Set repository secret VSX_TOKEN (https://open-vsx.org/user-settings/tokens)."
+            exit 1
+          fi
+          npx --yes ovsx publish tish.vsix

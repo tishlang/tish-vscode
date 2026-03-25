@@ -103,6 +103,6 @@ Same pattern as [tish](https://github.com/tishlang/tish): CI workflow plus separ
 | **`open-vsx-release.yml`** | release published/edited | Same trigger: download VSIX, publish to **[Open VSX](https://open-vsx.org/)** (VSCodium, etc.). |
 
 1. **`VSCE_PAT`** — Visual Studio Marketplace (`vscode-release`).
-2. **`OPEN_VSX_TOKEN`** — Open VSX ([create token](https://open-vsx.org/user-settings/tokens); sign publisher agreement first).
+2. **`VSX_TOKEN`** — Open VSX ([create token](https://open-vsx.org/user-settings/tokens); sign publisher agreement first).
 3. **Conventional commits** — feat/fix/perf/BREAKING CHANGE required for main merge.
 4. Align **`tishLsp.releaseTag`** with Tish’s GitHub release that ships `tish-lsp` binaries.
