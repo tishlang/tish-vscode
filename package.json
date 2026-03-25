@@ -1,5 +1,5 @@
 {
-  "name": "tish-vscode",
+  "name": "tish-extension",
   "displayName": "Tish",
   "description": "Language support for Tish — syntax highlighting, snippets, tasks; language server",
   "version": "0.1.0",
