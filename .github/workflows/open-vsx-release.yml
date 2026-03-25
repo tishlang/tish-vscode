@@ -1,0 +1,30 @@
+# Publish to Open VSX Registry when a GitHub release is promoted from prerelease to full release.
+# Downloads the VSIX from the release (no rebuild). Same trigger model as vscode-release.yml.
+
+name: Open VSX release
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  publish:
+    name: Publish to Open VSX
+    if: github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download VSIX from release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ASSET_URL=$(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | select(.name == "tish.vsix") | .url')
+          if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then
+            echo "::error::Release has no asset tish.vsix. Promote the prerelease (created on main merge by CI workflow) to full release."
+            exit 1
+          fi
+          curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/octet-stream" "$ASSET_URL" -o tish.vsix
+
+      - name: Publish to Open VSX Registry
+        run: npx --yes ovsx publish tish.vsix -p "$VSX_TOKEN"
+        env:
+          OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}
