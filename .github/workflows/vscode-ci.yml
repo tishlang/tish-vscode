@@ -46,17 +46,19 @@ jobs:
         id: set_version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE_COLOR: "0"
         run: |
+          set -euo pipefail
           VER=""
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
             if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
               npx semantic-release --dry-run 2>&1 | tee semantic-release.log
-              VER=$(sed -n 's/.*Published release \([0-9.]*\).*/\1/p' semantic-release.log | head -1)
+              VER=$(node scripts/extract-next-version.cjs semantic-release.log)
             fi
           fi
           if [ -z "$VER" ]; then
             VER=$(node -p "require('./package.json').version")
-            echo "Using package.json version: $VER"
+            echo "Using package.json version: $VER (PR / non-release branch)"
           else
             echo "Using semantic-release version: $VER"
           fi
@@ -92,6 +94,7 @@ jobs:
       - name: Require releasable commits (conventional commits)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE_COLOR: "0"
         run: |
           npx semantic-release --dry-run 2>&1 | tee release-check.log
           if grep -q "There are no relevant changes, so no new version is released." release-check.log; then
@@ -114,13 +117,18 @@ jobs:
 
       - run: npm ci
 
-      - name: Set extension version for VSIX
+      - name: Set extension version for VSIX (same as tish npm pack — bump before package)
         run: |
           node -e "
           const fs = require('fs');
           const p = require('./package.json');
-          p.version = process.env.VERSION;
+          const v = process.env.VERSION;
+          p.version = v;
+          if (p.tishLsp && typeof p.tishLsp === 'object') {
+            p.tishLsp.releaseTag = v.startsWith('v') ? v : 'v' + v;
+          }
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          console.log('package.json version ->', v, '| tishLsp.releaseTag ->', p.tishLsp?.releaseTag);
           "
         env:
           VERSION: ${{ needs.version.outputs.version }}
@@ -167,13 +175,11 @@ jobs:
         id: next_version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE_COLOR: "0"
         run: |
+          set -euo pipefail
           npx semantic-release --dry-run 2>&1 | tee release.log
-          VERSION=$(sed -n 's/.*Published release \([0-9.]*\).*/\1/p' release.log | head -1)
-          if [ -z "$VERSION" ]; then
-            echo "::error::Could not determine next version from semantic-release output"
-            exit 1
-          fi
+          VERSION=$(node scripts/extract-next-version.cjs release.log)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Next version: $VERSION"
 
