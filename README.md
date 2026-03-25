@@ -38,7 +38,7 @@ Optionally turn off **`tish.languageServerDownload.enable`** so it doesn’t ret
 
 ## Extension maintainers (this repo)
 
-- **No Rust in CI** — Only `npm` + `vsce`. Bump **`tishLsp.releaseTag`** in `package.json` when you want users to pull a newer `tish-lsp` from the Tish repo’s releases.
+- Bump **`tishLsp.releaseTag`** in `package.json` when you want users to pull a newer `tish-lsp` from the Tish repo’s releases.
 - The **Tish** repo must publish matching binaries on that tag (see [docs/lsp-release-assets.md](docs/lsp-release-assets.md)).
 
 ## Configuration
