@@ -1,11 +1,11 @@
 {
   "name": "tish-extension",
   "displayName": "Tish",
-  "description": "Language support for Tish — syntax highlighting, snippets, tasks; language server",
+  "description": "Language support for Tish (including JSX in .tish) — syntax highlighting, snippets, tasks; language server",
   "version": "0.1.0",
   "tishLsp": {
     "downloadRepo": "tishlang/tish",
-    "releaseTag": "v0.1.0"
+    "releaseTag": "v0.1.1"
   },
   "publisher": "tish",
   "license": "PIF",
@@ -31,12 +31,44 @@
     "native"
   ],
   "main": "./dist/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In Restricted Mode, workspace-defined language-server download settings are ignored. Syntax highlighting and a locally configured tish-lsp (user settings, PATH, or TISH_LANGUAGE_SERVER_PATH) still work; trust the workspace to allow workspace download overrides.",
+      "restrictedConfigurations": [
+        "tish.languageServerDownload.enable",
+        "tish.languageServerDownload.url",
+        "tish.languageServerDownload.repo",
+        "tish.languageServerDownload.releaseTag"
+      ]
+    }
+  },
   "activationEvents": [
     "onLanguage:tish",
-    "onLanguage:tish-jsx",
-    "workspaceContains:**/*.tish"
+    "onCommand:tish.showLanguageServerOutput",
+    "onCommand:tish.showExtensionOutput",
+    "onCommand:tish.toggleExtensionDebug",
+    "workspaceContains:**/*.tish",
+    "workspaceContains:**/*.tishx"
   ],
   "contributes": {
+    "commands": [
+      {
+        "command": "tish.showLanguageServerOutput",
+        "title": "Show Language Server Output",
+        "category": "Tish"
+      },
+      {
+        "command": "tish.showExtensionOutput",
+        "title": "Show Extension Output",
+        "category": "Tish"
+      },
+      {
+        "command": "tish.toggleExtensionDebug",
+        "title": "Toggle Extension Debug Logging",
+        "category": "Tish"
+      }
+    ],
     "languages": [
       {
         "id": "tish",
@@ -45,16 +77,7 @@
           "tish"
         ],
         "extensions": [
-          ".tish"
-        ],
-        "configuration": "./language-configuration.json"
-      },
-      {
-        "id": "tish-jsx",
-        "aliases": [
-          "Tish JSX"
-        ],
-        "extensions": [
+          ".tish",
           ".tishx"
         ],
         "configuration": "./language-configuration.json"
@@ -65,11 +88,6 @@
         "language": "tish",
         "scopeName": "source.tish",
         "path": "./syntaxes/tish.tmLanguage.json"
-      },
-      {
-        "language": "tish-jsx",
-        "scopeName": "source.tish.jsx",
-        "path": "./syntaxes/tish-jsx.tmLanguage.json"
       }
     ],
     "snippets": [
@@ -113,10 +131,15 @@
     "configuration": {
       "title": "Tish",
       "properties": {
+        "tish.debug.extension": {
+          "type": "boolean",
+          "default": false,
+          "description": "Log extension-side lifecycle and tish-lsp resolution to Output → “Tish Extension” with [tish-ext ISO8601 …] prefixes (boot lines always appear there). “Tish Language Server” is for the server process, downloads, and tish.trace.server. Toggle: “Tish: Toggle Extension Debug Logging”."
+        },
         "tish.languageServerPath": {
           "type": "string",
           "default": "",
-          "description": "Path to tish-lsp executable. Overrides download and PATH."
+          "description": "Path to tish-lsp executable. Overrides TISH_LANGUAGE_SERVER_PATH, dev sibling lookup, download, and PATH."
         },
         "tish.languageServerDownload.enable": {
           "type": "boolean",
@@ -150,8 +173,8 @@
         },
         "tish.format.enable": {
           "type": "boolean",
-          "default": true,
-          "description": "Enable format-on-save via tish-lsp (formatter runs inside the server)."
+          "default": false,
+          "description": "Format document on save via tish-lsp. Off by default: the formatter re-emits the AST and does not preserve comments; JSX is re-laid out (may differ from your style). Turn on only when you want normalized output."
         }
       }
     }

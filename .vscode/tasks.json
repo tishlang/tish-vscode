@@ -17,6 +17,22 @@
       "group": "build"
     },
     {
+      "label": "tish-lsp: cargo build (debug)",
+      "type": "shell",
+      "command": "cargo build -p tishlang_lsp",
+      "options": {
+        "cwd": "${workspaceFolder}/../tish"
+      },
+      "problemMatcher": "$rustc",
+      "group": "build"
+    },
+    {
+      "label": "extension dev: compile + tish-lsp (debug)",
+      "dependsOrder": "parallel",
+      "dependsOn": ["npm: compile", "tish-lsp: cargo build (debug)"],
+      "problemMatcher": []
+    },
+    {
       "label": "tish: run current file (example)",
       "type": "shell",
       "command": "tish",
