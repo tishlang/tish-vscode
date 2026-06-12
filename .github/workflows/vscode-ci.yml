@@ -121,11 +121,11 @@ jobs:
 
       - name: Install the published tish CLIs (no Rust / source build)
         run: |
-          # Install the SAME version as the pinned tish-lsp release (package.json tishLsp.releaseTag)
-          # straight from npm — these ship prebuilt platform binaries, so we test the exact artifacts
-          # users get, with no Rust toolchain / clone / cargo build. (npm exposes the formatter as
-          # `tish-format`; example-verify.cjs accepts that as well as the cargo name `tish-fmt`.)
-          VER=$(node -p "(require('./package.json').tishLsp?.releaseTag || 'v0.1.1').replace(/^v/, '')")
+          # Install the tish/format/lint CLIs at the SAME version as the pinned @tishlang/tish-lsp
+          # devDependency (same release), straight from npm — these ship prebuilt platform binaries,
+          # so we test the exact artifacts users get, no Rust toolchain / clone / cargo build. (npm
+          # exposes the formatter as `tish-format`; example-verify.cjs accepts that and `tish-fmt`.)
+          VER=$(node -p "require('./package.json').devDependencies['@tishlang/tish-lsp']")
           echo "Installing tish CLIs @ $VER"
           npm i --no-save "@tishlang/tish@$VER" "@tishlang/tish-format@$VER" "@tishlang/tish-lint@$VER"
 
