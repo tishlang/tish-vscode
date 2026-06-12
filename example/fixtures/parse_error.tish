@@ -1,0 +1,2 @@
+let x = (
+// deliberate: unclosed paren — parse error

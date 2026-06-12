@@ -1,0 +1,2 @@
+import { answer } from "./import_lib.tish"
+console.log(answer())

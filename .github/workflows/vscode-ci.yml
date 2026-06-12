@@ -104,6 +104,47 @@ jobs:
           fi
           echo "Release would be triggered — check passed."
 
+  example_harness:
+    name: Example harness (npm test + example:verify)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve Tish release tag
+        id: tish_tag
+        run: |
+          TAG=$(node -p "require('./package.json').tishLsp?.releaseTag || 'v0.1.1'")
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Using Tish tag $TAG"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Clone Tish at pinned tag
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.tish_tag.outputs.tag }}"
+          git clone --depth 1 --branch "$TAG" https://github.com/tishlang/tish.git "$GITHUB_WORKSPACE/../tish"
+
+      - name: Build tish, tish-fmt, tish-lint
+        run: |
+          cd "$GITHUB_WORKSPACE/../tish"
+          cargo build --release -p tishlang -p tishlang_fmt -p tishlang_lint
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run tests and example verify
+        run: |
+          echo "$GITHUB_WORKSPACE/../tish/target/release" >> "$GITHUB_PATH"
+          npm test
+          npm run example:verify
+
   build:
     name: Build & package VSIX
     needs: [version]

@@ -30,16 +30,44 @@ function tishLspOnPath(): string | undefined {
 
 function missingTishLspMessage(): string {
   return (
-    "tish-lsp was not found. Either: (1) turn ON " +
-    '"Tish › Language Server Download: Enable" (tish.languageServerDownload.enable) and reload the window, ' +
-    "(2) install tish-lsp and put it on your PATH, " +
-    "(3) set Tish › Language Server Path (tish.languageServerPath) to the binary, or " +
-    "(4) when hacking this extension, set env TISH_LANGUAGE_SERVER_PATH or build " +
-    "`tishlang_lsp` in a sibling `../tish` repo (see Run Extension launch configs)."
+    "tish-lsp was not found. The extension is meant to download it automatically. Try: " +
+    '(1) enable "Tish › Language Server Download: Enable" (tish.languageServerDownload.enable), then Reload Window; ' +
+    "(2) set tish.languageServerDownload.url to a direct binary URL if your network blocks GitHub; " +
+    '(3) set "Tish › Language Server Path" (tish.languageServerPath) to a prebuilt tish-lsp you obtained from GitHub Releases; ' +
+    "(4) put a working tish-lsp on PATH as a last resort."
   );
 }
 
 const binName = process.platform === "win32" ? "tish-lsp.exe" : "tish-lsp";
+
+/**
+ * Expand VS Code-style workspace placeholders in settings values (`tish.languageServerPath`,
+ * `tish.tishlangSourceRoot`). Supports `${workspaceFolder}` and `${workspaceFolder:Name}` for
+ * multi-root workspaces (`.code-workspace` `folders[].name`).
+ */
+export function expandWorkspaceVariablesInPath(raw: string): string {
+  if (!raw.includes("${")) {
+    return raw;
+  }
+  const folders = vscode.workspace.workspaceFolders ?? [];
+  let s = raw;
+  for (const f of folders) {
+    const label = f.name;
+    if (label?.length) {
+      const token = "${workspaceFolder:" + label + "}";
+      s = s.split(token).join(f.uri.fsPath);
+    }
+  }
+  if (folders[0]) {
+    s = s.split("${workspaceFolder}").join(folders[0].uri.fsPath);
+  }
+  if (s.includes("${")) {
+    throw new Error(
+      `Unresolved workspace placeholder in path: "${raw}". For multi-root, use \${workspaceFolder:YourFolderName} matching "name" in the .code-workspace file, or open a single folder.`
+    );
+  }
+  return path.resolve(s);
+}
 
 /** Non-config override for launch.json / CI (checked after workspace `languageServerPath`). */
 function languageServerPathFromEnv(): string | undefined {
@@ -101,9 +129,11 @@ function releaseDownloadUrl(repo: string, tag: string, baseName: string): string
 }
 
 /**
- * Resolution order: workspace `languageServerPath` → `TISH_LANGUAGE_SERVER_PATH` →
- * sibling `../tish/target/{debug,release}/tish-lsp` (extension dev only) → GitHub download
- * (if enabled) → `tish-lsp` on PATH.
+ * Resolution order (end users rely on GitHub download; no compiler build required):
+ * workspace `languageServerPath` → `TISH_LANGUAGE_SERVER_PATH` (only if that file exists;
+ * missing env path is ignored so download can run) → sibling `../tish/target/.../tish-lsp`
+ * (extension Development host only) → GitHub download (cache + fetch when enabled) →
+ * `tish-lsp` on PATH.
  */
 export async function resolveLanguageServerExecutable(
   context: vscode.ExtensionContext,
@@ -113,31 +143,38 @@ export async function resolveLanguageServerExecutable(
 ): Promise<string> {
   extLog(
     diag,
-    "resolve: order is languageServerPath → TISH_LANGUAGE_SERVER_PATH → sibling dev → download → PATH",
+    "resolve: order is languageServerPath → TISH_LANGUAGE_SERVER_PATH (if exists) → sibling dev → download → PATH",
     {}
   );
 
   const custom = config.get<string>("languageServerPath")?.trim();
   if (custom) {
-    extLog(diag, "resolve: branch languageServerPath", { custom, exists: fs.existsSync(custom) });
-    if (!fs.existsSync(custom)) {
+    const expanded = expandWorkspaceVariablesInPath(custom);
+    extLog(diag, "resolve: branch languageServerPath", {
+      custom,
+      expanded,
+      exists: fs.existsSync(expanded),
+    });
+    if (!fs.existsSync(expanded)) {
       throw new Error(
-        `tish.languageServerPath does not exist: ${custom}. Fix the path or clear the setting.`
+        `tish.languageServerPath does not exist: ${expanded} (configured as "${custom}"). Fix the path or clear the setting.`
       );
     }
-    return custom;
+    return expanded;
   }
 
   const fromEnv = languageServerPathFromEnv();
   if (fromEnv) {
-    extLog(diag, "resolve: branch TISH_LANGUAGE_SERVER_PATH", { fromEnv, exists: fs.existsSync(fromEnv) });
-    if (!fs.existsSync(fromEnv)) {
-      throw new Error(
-        `TISH_LANGUAGE_SERVER_PATH does not exist: ${fromEnv}. Unset it or point it at a built tish-lsp binary.`
-      );
+    const envExists = fs.existsSync(fromEnv);
+    extLog(diag, "resolve: branch TISH_LANGUAGE_SERVER_PATH", { fromEnv, exists: envExists });
+    if (envExists) {
+      log.appendLine(`Using tish-lsp from TISH_LANGUAGE_SERVER_PATH: ${fromEnv}`);
+      return fromEnv;
     }
-    log.appendLine(`Using tish-lsp from TISH_LANGUAGE_SERVER_PATH: ${fromEnv}`);
-    return fromEnv;
+    log.appendLine(
+      `Tish: TISH_LANGUAGE_SERVER_PATH is set but file is missing (${fromEnv}); continuing with automatic download / PATH.`
+    );
+    extLog(diag, "resolve: TISH_LANGUAGE_SERVER_PATH missing on disk; fall through", { fromEnv });
   }
 
   const sibling = languageServerPathSiblingDev(context, diag);
@@ -203,7 +240,7 @@ export async function resolveLanguageServerExecutable(
             const baseMsg = `HTTP ${res.status}: could not download "${base}" from https://github.com/${repo}/releases/tag/${tag}`;
             const hint404 =
               res.status === 404
-                ? " No file at that URL (missing release/tag, private repo, or binaries not uploaded). Build tish-lsp from the Tish compiler repo (cargo build -p tishlang_lsp), set tish.languageServerPath, set tish.languageServerDownload.url to a direct URL, or use launch \"Run Extension (rebuild local tish-lsp)\" when ../tish is a sibling checkout. See docs/lsp-release-assets.md for release asset names."
+                ? " No file at that URL (wrong or unpublished release tag, private repo, or assets not uploaded yet). Fix: pick a tag that has `tish-lsp-<platform>` on GitHub Releases, set tish.languageServerDownload.releaseTag / .repo, or set tish.languageServerDownload.url to a direct binary URL. Optionally set tish.languageServerPath to a binary you downloaded by hand. See docs/lsp-release-assets.md for expected asset names."
                 : "";
             throw new Error(baseMsg + "." + hint404);
           }
@@ -228,6 +265,15 @@ export async function resolveLanguageServerExecutable(
     return dest;
   } else {
     extLog(diag, "resolve: skipping GitHub download branch", { dl, platformId });
+    if (!platformId) {
+      log.appendLine(
+        "Tish: no prebuilt GitHub asset id for this OS/architecture; automatic download is skipped. Install a matching tish-lsp and set tish.languageServerPath, or use tish.languageServerDownload.url."
+      );
+    } else if (!dl) {
+      log.appendLine(
+        'Tish: language server download is disabled (tish.languageServerDownload.enable). Enable it for automatic binaries, or set tish.languageServerPath / PATH.'
+      );
+    }
   }
 
   const onPath = tishLspOnPath();

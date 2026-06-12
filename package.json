@@ -1,7 +1,7 @@
 {
   "name": "tish-extension",
   "displayName": "Tish",
-  "description": "Language support for Tish (including JSX in .tish) — syntax highlighting, snippets, tasks; language server",
+  "description": "Language support for Tish (including JSX in .tish) — syntax highlighting, snippets, tasks; language server (downloads prebuilt tish-lsp; no local compiler required)",
   "version": "0.1.0",
   "tishLsp": {
     "downloadRepo": "tishlang/tish",
@@ -49,7 +49,7 @@
     "onCommand:tish.showExtensionOutput",
     "onCommand:tish.toggleExtensionDebug",
     "workspaceContains:**/*.tish",
-    "workspaceContains:**/*.tishx"
+    "workspaceContains:**/*.d.tish"
   ],
   "contributes": {
     "commands": [
@@ -78,7 +78,7 @@
         ],
         "extensions": [
           ".tish",
-          ".tishx"
+          ".d.tish"
         ],
         "configuration": "./language-configuration.json"
       }
@@ -139,12 +139,12 @@
         "tish.languageServerPath": {
           "type": "string",
           "default": "",
-          "description": "Path to tish-lsp executable. Overrides TISH_LANGUAGE_SERVER_PATH, dev sibling lookup, download, and PATH."
+          "description": "Optional path to a prebuilt tish-lsp executable. When empty, the extension downloads the matching binary from GitHub Releases (see language server download settings). When set, this overrides automatic download, TISH_LANGUAGE_SERVER_PATH, dev sibling lookup, and PATH. You may use ${workspaceFolder} or ${workspaceFolder:Name} (multi-root .code-workspace); they are expanded to absolute paths before spawn."
         },
         "tish.languageServerDownload.enable": {
           "type": "boolean",
           "default": true,
-          "description": "Download tish-lsp from GitHub Releases on first use (cached under global storage)."
+          "description": "Download a prebuilt tish-lsp from GitHub Releases on first use and cache it under global storage (recommended; no Rust/cargo install needed)."
         },
         "tish.languageServerDownload.repo": {
           "type": "string",
@@ -175,6 +175,11 @@
           "type": "boolean",
           "default": false,
           "description": "Format document on save via tish-lsp. Off by default: the formatter re-emits the AST and does not preserve comments; JSX is re-laid out (may differ from your style). Turn on only when you want normalized output."
+        },
+        "tish.tishlangSourceRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to your local `tishlang/tish` repository root (directory that contains `crates/`). When set, Go to Definition on built-in globals (e.g. `setTimeout`, `console`), `Math.*` / `JSON.*`, and JSX intrinsic tags (e.g. `<div>`) jumps to the corresponding Rust sources; hover on those globals includes a clickable link to the same target. Same as the `TISHLANG_SOURCE_ROOT` environment variable for the language server process."
         }
       }
     }
@@ -183,7 +188,11 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package:vsix": "npx --yes @vscode/vsce@3 package --out tish.vsix"
+    "package:vsix": "npx --yes @vscode/vsce@3 package --out tish.vsix",
+    "test": "node --test test/**/*.test.cjs",
+    "example:verify": "node scripts/example-verify.cjs",
+    "example:reset": "node scripts/copy-example-scratch.cjs",
+    "example:tree-sitter": "node scripts/example-tree-sitter.cjs"
   },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^13.0.1",
@@ -195,6 +204,7 @@
     "typescript": "^5.3.0"
   },
   "dependencies": {
+    "@jridgewell/trace-mapping": "^0.3.25",
     "vscode-languageclient": "^9.0.1"
   }
 }

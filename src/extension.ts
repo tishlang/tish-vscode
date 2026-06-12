@@ -6,8 +6,9 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-import { resolveLanguageServerExecutable } from "./downloadLsp";
+import { expandWorkspaceVariablesInPath, resolveLanguageServerExecutable } from "./downloadLsp";
 import { extLog, extensionDebugEnabled } from "./extDebug";
+import { registerJsSourceMapDefinition } from "./jsSourceMapDefinition";
 import { isProbablyPath } from "./serverPath";
 
 let client: LanguageClient | undefined;
@@ -36,11 +37,13 @@ export function activate(context: vscode.ExtensionContext): void {
     'Tish: this channel is for the language server process (downloads, “tish-lsp started”, traces). Extension boot / [tish-ext] debug → Output → “Tish Extension”.'
   );
 
+  registerJsSourceMapDefinition(context);
+
   context.subscriptions.push(
     vscode.commands.registerCommand("tish.showLanguageServerOutput", () => {
       log.show(true);
       void vscode.window.showInformationMessage(
-        'Tish: opened “Tish Language Server”. For extension resolver / [tish-ext] lines use Output → “Tish Extension” (or “Tish: Show Extension Output”). Look for “tish-lsp started” here; if missing, set tish.languageServerPath or PATH and reload.'
+        'Tish: opened “Tish Language Server”. For resolver / [tish-ext] lines use Output → “Tish Extension”. Look for “tish-lsp started” here; if missing, confirm automatic download is enabled (tish.languageServerDownload.enable), check the log for HTTP errors, then Reload Window.'
       );
     })
   );
@@ -67,10 +70,10 @@ export function activate(context: vscode.ExtensionContext): void {
   );
   if (!vscode.workspace.isTrusted) {
     log.appendLine(
-      "Workspace is not trusted (Restricted Mode): workspace-level language-server download overrides are ignored. Use User settings for tish.languageServerPath, put tish-lsp on PATH, set TISH_LANGUAGE_SERVER_PATH, or trust this workspace."
+      "Workspace is not trusted (Restricted Mode): workspace-level language-server download overrides are ignored; the extension still uses your User settings and the built-in default (download from GitHub Releases). Trust the workspace only if you intentionally want repo-provided download URL/tag overrides."
     );
     extensionDiag.appendLine(
-      "Workspace is not trusted (Restricted Mode): workspace-level language-server download overrides are ignored (same note as on “Tish Language Server”)."
+      "Workspace is not trusted (Restricted Mode): workspace-level language-server download overrides are ignored; automatic download still applies from User defaults (see “Tish Language Server” output)."
     );
   }
 
@@ -114,17 +117,27 @@ export function activate(context: vscode.ExtensionContext): void {
       },
     };
 
+    let srcRoot = config.get<string>("tishlangSourceRoot")?.trim() ?? "";
+    if (srcRoot.length > 0) {
+      try {
+        srcRoot = expandWorkspaceVariablesInPath(srcRoot);
+      } catch (e) {
+        extensionDiag.appendLine(
+          `Tish: tish.tishlangSourceRoot not applied (${e instanceof Error ? e.message : String(e)}).`
+        );
+        srcRoot = "";
+      }
+    }
     const clientOptions: LanguageClientOptions = {
       // `untitled` covers “New file” then language set to Tish; `file` is normal on-disk workspaces.
       documentSelector: [
         { scheme: "file", language: "tish" },
         { scheme: "untitled", language: "tish" },
       ],
+      initializationOptions:
+        srcRoot.length > 0 ? { tishlangSourceRoot: srcRoot } : undefined,
       synchronize: {
-        fileEvents: [
-          vscode.workspace.createFileSystemWatcher("**/*.tish"),
-          vscode.workspace.createFileSystemWatcher("**/*.tishx"),
-        ],
+        fileEvents: [vscode.workspace.createFileSystemWatcher("**/*.tish")],
       },
       outputChannel: log,
       revealOutputChannelOn: RevealOutputChannelOn.Error,
@@ -148,14 +161,14 @@ export function activate(context: vscode.ExtensionContext): void {
           "tish-lsp started — go to definition (⌘/Ctrl+click), hover, references, rename, completion."
         );
         log.appendLine(
-          "If those are missing, point tish.languageServerPath at a recent `cargo build -p tishlang_lsp --release` binary and reload."
+          "If those are missing, set tish.languageServerDownload.releaseTag to a release that ships tish-lsp for your OS, or tish.languageServerPath to a newer prebuilt binary, then reload."
         );
       })
       .catch((err: unknown) => {
         const hint =
           serverExec === "tish-lsp" || !isProbablyPath(serverExec)
-            ? `Install tish-lsp on PATH or set tish.languageServerPath.`
-            : `Check tish.languageServerPath.`;
+            ? `Ensure automatic download succeeded (Output → Tish Language Server), or set tish.languageServerPath to a prebuilt tish-lsp.`
+            : `Check tish.languageServerPath points at a runnable tish-lsp binary.`;
         extLog(extensionDiag, "LanguageClient.start: rejected", {
           message: String(err),
           stack: err instanceof Error ? err.stack : undefined,

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "description": "Expected outcomes for npm run example:verify. Pin CLI to package.json tishLsp.releaseTag (or same commit) as extension LSP when possible.",
+  "fixtures": [
+    {
+      "path": "fixtures/valid.tish",
+      "fmtCheck": { "expect": "pass" },
+      "lint": { "expectExit": 0 },
+      "run": { "expectExit": 0 }
+    },
+    {
+      "path": "fixtures/parse_error.tish",
+      "fmtCheck": { "expect": "fail" },
+      "lint": { "expectExit": 1, "stderrContains": ["tish-parse-error"] },
+      "run": { "expectExit": 1 }
+    },
+    {
+      "path": "fixtures/ugly_format.tish",
+      "fmtCheck": { "expect": "fail" },
+      "lint": { "expectExit": 0 },
+      "run": { "expectExit": 0 }
+    },
+    {
+      "path": "fixtures/lint_empty_catch.tish",
+      "fmtCheck": { "expect": "pass" },
+      "lint": {
+        "expectExit": 0,
+        "stdoutContains": ["tish-empty-catch"]
+      },
+      "run": { "expectExit": 0 }
+    },
+    {
+      "path": "fixtures/lint_duplicate_key.tish",
+      "fmtCheck": { "expect": "pass" },
+      "lint": {
+        "expectExit": 0,
+        "stdoutContains": ["tish-duplicate-key"]
+      },
+      "run": { "expectExit": 0 }
+    },
+    {
+      "path": "fixtures/import_lib.tish",
+      "fmtCheck": { "expect": "pass" },
+      "lint": { "expectExit": 0 },
+      "run": { "expectExit": 0 }
+    },
+    {
+      "path": "fixtures/import_consumer.tish",
+      "fmtCheck": { "expect": "pass" },
+      "lint": { "expectExit": 0 },
+      "run": { "expectExit": 0 }
+    },
+    {
+      "path": "fixtures/tree_sitter_subset/minimal.tish",
+      "fmtCheck": { "expect": "pass" },
+      "lint": { "expectExit": 0 },
+      "run": { "expectExit": 0 }
+    }
+  ],
+  "treeSitter": {
+    "paths": ["fixtures/tree_sitter_subset/minimal.tish"]
+  }
+}

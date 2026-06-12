@@ -41,10 +41,10 @@
       "problemMatcher": []
     },
     {
-      "label": "tish: compile native (example)",
+      "label": "tish: build native (example)",
       "type": "shell",
       "command": "tish",
-      "args": ["compile", "${file}", "--output", "${workspaceFolder}/tish_out", "--target", "native"],
+      "args": ["build", "${file}", "--output", "${workspaceFolder}/tish_out", "--target", "native"],
       "group": "build",
       "problemMatcher": ["$tish-rustc"]
     },

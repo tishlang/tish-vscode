@@ -2,3 +2,5 @@ node_modules/
 dist/
 *.vsix
 .DS_Store
+example/scratch/
+example/toolchain-lock.txt
