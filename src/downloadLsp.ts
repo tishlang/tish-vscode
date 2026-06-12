@@ -87,16 +87,18 @@ function languageServerPathSiblingDev(
     });
     return undefined;
   }
-  const base = path.join(context.extensionPath, "..", "tish", "target");
+  // Build extension-relative paths with VS Code's Uri API (not Node path.join on the extension dir).
   for (const profile of ["debug", "release"]) {
-    const p = path.join(base, profile, binName);
+    const p = vscode.Uri.joinPath(context.extensionUri, "..", "tish", "target", profile, binName).fsPath;
     const exists = fs.existsSync(p);
     extLog(diag, "sibling dev: candidate", { profile, path: p, exists });
     if (exists) {
       return p;
     }
   }
-  extLog(diag, "sibling dev: no binary under ../tish/target/{debug,release}", { base });
+  extLog(diag, "sibling dev: no binary under ../tish/target/{debug,release}", {
+    base: vscode.Uri.joinPath(context.extensionUri, "..", "tish", "target").fsPath,
+  });
   return undefined;
 }
 
@@ -157,8 +159,9 @@ export async function resolveLanguageServerExecutable(
     return sibling;
   }
 
-  // Bundled binary: server/tish-lsp(.exe) shipped inside this platform-specific .vsix.
-  const bundled = path.join(context.extensionPath, "server", binName);
+  // Bundled binary: server/tish-lsp(.exe) shipped inside this platform-specific .vsix. Built with
+  // VS Code's Uri API (not Node path.join on the extension dir); binName is a fixed constant.
+  const bundled = vscode.Uri.joinPath(context.extensionUri, "server", binName).fsPath;
   extLog(diag, "resolve: branch bundled binary", { bundled, exists: fs.existsSync(bundled) });
   if (fs.existsSync(bundled)) {
     if (process.platform !== "win32") {
