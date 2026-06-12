@@ -100,11 +100,14 @@ function expectRun(tish, absPath, expectExit) {
 function main() {
   const manifest = loadManifest(repoRoot);
   const tish = which("tish");
-  const tishFmt = which("tish-fmt");
+  // The cargo binary is `tish-fmt`; the published @tishlang/tish-format npm package installs the
+  // same binary under the command `tish-format`. Accept either so the harness works against a
+  // local cargo build and the published npm package.
+  const tishFmt = which("tish-fmt") || which("tish-format");
   const tishLint = which("tish-lint");
   if (!tish || !tishFmt || !tishLint) {
     console.error(
-      "example:verify requires tish, tish-fmt, and tish-lint on PATH (or set TISH_BIN_DIR to a directory containing them)."
+      "example:verify requires tish, tish-fmt|tish-format, and tish-lint on PATH (or set TISH_BIN_DIR to a directory containing them)."
     );
     console.error({ tish, tishFmt, tishLint });
     process.exit(1);

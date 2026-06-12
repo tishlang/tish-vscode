@@ -112,26 +112,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve Tish release tag
-        id: tish_tag
-        run: |
-          TAG=$(node -p "require('./package.json').tishLsp?.releaseTag || 'v0.1.1'")
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Using Tish tag $TAG"
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - name: Clone Tish at pinned tag
-        run: |
-          set -euo pipefail
-          TAG="${{ steps.tish_tag.outputs.tag }}"
-          git clone --depth 1 --branch "$TAG" https://github.com/tishlang/tish.git "$GITHUB_WORKSPACE/../tish"
-
-      - name: Build tish, tish-fmt, tish-lint
-        run: |
-          cd "$GITHUB_WORKSPACE/../tish"
-          cargo build --release -p tishlang -p tishlang_fmt -p tishlang_lint
-
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -139,12 +119,19 @@ jobs:
 
       - run: npm ci
 
+      - name: Install the published tish CLIs (no Rust / source build)
+        run: |
+          # Install the SAME version as the pinned tish-lsp release (package.json tishLsp.releaseTag)
+          # straight from npm — these ship prebuilt platform binaries, so we test the exact artifacts
+          # users get, with no Rust toolchain / clone / cargo build. (npm exposes the formatter as
+          # `tish-format`; example-verify.cjs accepts that as well as the cargo name `tish-fmt`.)
+          VER=$(node -p "(require('./package.json').tishLsp?.releaseTag || 'v0.1.1').replace(/^v/, '')")
+          echo "Installing tish CLIs @ $VER"
+          npm i --no-save "@tishlang/tish@$VER" "@tishlang/tish-format@$VER" "@tishlang/tish-lint@$VER"
+
       - name: Run tests and example verify
-        # TISH_BIN_DIR (which example-verify.cjs checks before PATH) instead of $GITHUB_PATH:
-        # appending to $GITHUB_PATH only affects *subsequent* steps, so the binaries built above
-        # were not on PATH for example:verify in this same step (which() returned null for all 3).
         env:
-          TISH_BIN_DIR: ${{ github.workspace }}/../tish/target/release
+          TISH_BIN_DIR: ${{ github.workspace }}/node_modules/.bin
         run: |
           npm test
           npm run example:verify
