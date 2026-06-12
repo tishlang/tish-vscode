@@ -1,12 +1,8 @@
 {
   "name": "tish-extension",
   "displayName": "Tish",
-  "description": "Language support for Tish (including JSX in .tish) — syntax highlighting, snippets, tasks; language server (downloads prebuilt tish-lsp; no local compiler required)",
+  "description": "Language support for Tish (including JSX in .tish) — syntax highlighting, snippets, tasks; bundled tish-lsp language server (no download, no compiler required)",
   "version": "0.1.0",
-  "tishLsp": {
-    "downloadRepo": "tishlang/tish",
-    "releaseTag": "v2.0.3"
-  },
   "publisher": "tish",
   "license": "PIF",
   "repository": {
@@ -34,12 +30,9 @@
   "capabilities": {
     "untrustedWorkspaces": {
       "supported": "limited",
-      "description": "In Restricted Mode, workspace-defined language-server download settings are ignored. Syntax highlighting and a locally configured tish-lsp (user settings, PATH, or TISH_LANGUAGE_SERVER_PATH) still work; trust the workspace to allow workspace download overrides.",
+      "description": "In Restricted Mode, a workspace-defined `tish.languageServerPath` is ignored (it could point the editor at an arbitrary executable). Syntax highlighting and the bundled tish-lsp still work; trust the workspace to allow a workspace-level server-path override.",
       "restrictedConfigurations": [
-        "tish.languageServerDownload.enable",
-        "tish.languageServerDownload.url",
-        "tish.languageServerDownload.repo",
-        "tish.languageServerDownload.releaseTag"
+        "tish.languageServerPath"
       ]
     }
   },
@@ -139,27 +132,7 @@
         "tish.languageServerPath": {
           "type": "string",
           "default": "",
-          "description": "Optional path to a prebuilt tish-lsp executable. When empty, the extension downloads the matching binary from GitHub Releases (see language server download settings). When set, this overrides automatic download, TISH_LANGUAGE_SERVER_PATH, dev sibling lookup, and PATH. You may use ${workspaceFolder} or ${workspaceFolder:Name} (multi-root .code-workspace); they are expanded to absolute paths before spawn."
-        },
-        "tish.languageServerDownload.enable": {
-          "type": "boolean",
-          "default": true,
-          "description": "Download a prebuilt tish-lsp from GitHub Releases on first use and cache it under global storage (recommended; no Rust/cargo install needed)."
-        },
-        "tish.languageServerDownload.repo": {
-          "type": "string",
-          "default": "",
-          "description": "GitHub repo owner/name for binaries (default: value from extension package.json tishLsp.downloadRepo)."
-        },
-        "tish.languageServerDownload.releaseTag": {
-          "type": "string",
-          "default": "",
-          "description": "Release tag to download (default: package.json tishLsp.releaseTag)."
-        },
-        "tish.languageServerDownload.url": {
-          "type": "string",
-          "default": "",
-          "description": "Full URL to tish-lsp binary (overrides repo/tag asset lookup)."
+          "description": "Optional path to a tish-lsp executable that overrides the one bundled with the extension. When empty, the bundled tish-lsp is used. When set, this overrides the bundled server, TISH_LANGUAGE_SERVER_PATH, the dev sibling lookup, and PATH. You may use ${workspaceFolder} or ${workspaceFolder:Name} (multi-root .code-workspace); they are expanded to absolute paths before spawn."
         },
         "tish.trace.server": {
           "type": "string",
@@ -185,9 +158,12 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run stage-lsp && npm run bundle",
+    "typecheck": "tsc -p ./ --noEmit",
+    "bundle": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18 --sourcemap",
+    "compile": "npm run typecheck && npm run bundle",
+    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18 --sourcemap --watch",
+    "stage-lsp": "node scripts/stage-lsp.cjs",
     "package:vsix": "npx --yes @vscode/vsce@3 package --out tish.vsix",
     "test": "node --test test/**/*.test.cjs",
     "example:verify": "node scripts/example-verify.cjs",
@@ -198,8 +174,10 @@
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.0",
+    "@tishlang/tish-lsp": "2.1.0",
     "@types/node": "^20.10.0",
     "@types/vscode": "^1.85.0",
+    "esbuild": "0.24.2",
     "semantic-release": "^25.0.3",
     "typescript": "^5.3.0"
   },

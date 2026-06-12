@@ -1,5 +1,5 @@
 # Publish to VS Code Marketplace when a GitHub release is promoted from prerelease to full release.
-# Downloads the VSIX from the release (no rebuild). Mirrors tish npm-release.yml.
+# Publishes every platform-specific VSIX from the release (no rebuild). Mirrors tish npm-release.yml.
 
 name: VS Code release
 
@@ -13,18 +13,27 @@ jobs:
     if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     steps:
-      - name: Download VSIX from release
+      - name: Download platform VSIXes from release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ASSET_URL=$(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | select(.name == "tish.vsix") | .url')
-          if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then
-            echo "::error::Release has no asset tish.vsix. Promote the prerelease (created on main merge by CI workflow) to full release."
-            exit 1
-          fi
-          curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/octet-stream" "$ASSET_URL" -o tish.vsix
+          mkdir -p vsix
+          echo '${{ toJSON(github.event.release.assets) }}' \
+            | jq -r '.[] | select(.name | test("^tish-.*\\.vsix$")) | "\(.name)\t\(.url)"' > assets.tsv
+          [ -s assets.tsv ] || { echo "::error::Release has no tish-<platform>.vsix assets. Promote the prerelease created by the CI workflow."; exit 1; }
+          while IFS=$'\t' read -r name url; do
+            echo "Downloading $name"
+            curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/octet-stream" "$url" -o "vsix/$name"
+          done < assets.tsv
+          ls -la vsix/
 
-      - name: Publish to VS Code Marketplace
-        run: npx --yes @vscode/vsce@3 publish -p "$VSCE_PAT" --packagePath tish.vsix
+      - name: Publish each platform VSIX to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          # Each VSIX carries its own --target metadata, so publishing them all registers the
+          # platform-specific versions and the Marketplace serves the right binary per user.
+          for f in vsix/*.vsix; do
+            echo "Publishing $f"
+            npx --yes @vscode/vsce@3 publish -p "$VSCE_PAT" --packagePath "$f"
+          done

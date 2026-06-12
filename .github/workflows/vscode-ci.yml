@@ -121,11 +121,11 @@ jobs:
 
       - name: Install the published tish CLIs (no Rust / source build)
         run: |
-          # Install the SAME version as the pinned tish-lsp release (package.json tishLsp.releaseTag)
-          # straight from npm — these ship prebuilt platform binaries, so we test the exact artifacts
-          # users get, with no Rust toolchain / clone / cargo build. (npm exposes the formatter as
-          # `tish-format`; example-verify.cjs accepts that as well as the cargo name `tish-fmt`.)
-          VER=$(node -p "(require('./package.json').tishLsp?.releaseTag || 'v0.1.1').replace(/^v/, '')")
+          # Install the tish/format/lint CLIs at the SAME version as the pinned @tishlang/tish-lsp
+          # devDependency (same release), straight from npm — these ship prebuilt platform binaries,
+          # so we test the exact artifacts users get, no Rust toolchain / clone / cargo build. (npm
+          # exposes the formatter as `tish-format`; example-verify.cjs accepts that and `tish-fmt`.)
+          VER=$(node -p "require('./package.json').devDependencies['@tishlang/tish-lsp']")
           echo "Installing tish CLIs @ $VER"
           npm i --no-save "@tishlang/tish@$VER" "@tishlang/tish-format@$VER" "@tishlang/tish-lint@$VER"
 
@@ -137,9 +137,15 @@ jobs:
           npm run example:verify
 
   build:
-    name: Build & package VSIX
+    name: Build & package VSIX (${{ matrix.target }})
     needs: [version]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # vsce target == @tishlang/tish-lsp platform dir; one platform-specific .vsix per target,
+        # each bundling only that platform's tish-lsp binary (staged via TISH_LSP_TARGET).
+        target: [darwin-arm64, darwin-x64, linux-x64, linux-arm64, win32-x64]
     steps:
       - uses: actions/checkout@v4
 
@@ -150,28 +156,30 @@ jobs:
 
       - run: npm ci
 
-      - name: Set extension version for VSIX (same as tish npm pack — bump before package)
+      - name: Set extension version for VSIX
         run: |
           node -e "
           const fs = require('fs');
           const p = require('./package.json');
-          const v = process.env.VERSION;
-          p.version = v;
-          if (p.tishLsp && typeof p.tishLsp === 'object') {
-            p.tishLsp.releaseTag = v.startsWith('v') ? v : 'v' + v;
-          }
+          p.version = process.env.VERSION;
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
-          console.log('package.json version ->', v, '| tishLsp.releaseTag ->', p.tishLsp?.releaseTag);
+          console.log('package.json version ->', p.version);
           "
         env:
           VERSION: ${{ needs.version.outputs.version }}
 
-      - run: npm run compile
-      - run: npx --yes @vscode/vsce@3 package --out tish.vsix
+      - run: npm run typecheck
+
+      - name: Package ${{ matrix.target }} VSIX
+        # vsce runs `vscode:prepublish` (stage-lsp + esbuild bundle); stage-lsp reads TISH_LSP_TARGET.
+        env:
+          TISH_LSP_TARGET: ${{ matrix.target }}
+        run: npx --yes @vscode/vsce@3 package --target ${{ matrix.target }} --out "tish-${{ matrix.target }}.vsix"
+
       - uses: actions/upload-artifact@v4
         with:
-          name: tish-vsix
-          path: tish.vsix
+          name: tish-vsix-${{ matrix.target }}
+          path: tish-${{ matrix.target }}.vsix
           if-no-files-found: error
 
   release:
@@ -216,24 +224,19 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Next version: $VERSION"
 
-      - name: Download VSIX
+      - name: Download all platform VSIXes
         uses: actions/download-artifact@v4
         with:
-          name: tish-vsix
+          pattern: tish-vsix-*
+          path: vsix-artifacts
+          merge-multiple: true
 
-      # download-artifact@v4 extracts to ./<artifact-name>/ (here: tish-vsix/tish.vsix), not ./tish.vsix
-      - name: Stage VSIX for upload
+      - name: Stage VSIXes for upload
         run: |
-          if [ -f tish-vsix/tish.vsix ]; then
-            cp tish-vsix/tish.vsix ./tish.vsix
-          elif [ -f tish.vsix ]; then
-            echo "VSIX already at repo root"
-          else
-            echo "::error::tish.vsix not found after download-artifact"
-            find . -name '*.vsix' -print || true
-            exit 1
-          fi
-          ls -la tish.vsix
+          mkdir -p vsix
+          find vsix-artifacts -name 'tish-*.vsix' -exec cp {} vsix/ \;
+          echo "Platform VSIXes:"; ls -la vsix/
+          [ "$(ls vsix/*.vsix 2>/dev/null | wc -l)" -ge 1 ] || { echo "::error::no platform .vsix found after download-artifact"; find . -name '*.vsix' -print || true; exit 1; }
 
       - name: Generate release notes from commits
         run: |
@@ -298,24 +301,28 @@ jobs:
           fi
           echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
 
-      - name: Upload VSIX to prerelease
+      - name: Upload VSIXes to prerelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           RELEASE_ID="${{ steps.create_release.outputs.release_id }}"
           REPO="${{ github.repository }}"
-          ASSET_ID=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://api.github.com/repos/$REPO/releases/$RELEASE_ID" | jq -r '.assets[] | select(.name=="tish.vsix") | .id')
-          if [ -n "$ASSET_ID" ] && [ "$ASSET_ID" != "null" ]; then
-            curl -s -X DELETE -H "Authorization: Bearer $GITHUB_TOKEN" \
-              "https://api.github.com/repos/$REPO/releases/assets/$ASSET_ID"
-          fi
           UPLOAD_URL="https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets"
-          test -s tish.vsix || { echo "::error::tish.vsix missing or empty"; exit 1; }
-          curl -sS --fail-with-body -X POST \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @tish.vsix \
-            "${UPLOAD_URL}?name=tish.vsix"
+          EXISTING=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/$REPO/releases/$RELEASE_ID")
+          for f in vsix/*.vsix; do
+            name=$(basename "$f")
+            # replace any existing asset of the same name so re-runs are idempotent
+            aid=$(echo "$EXISTING" | jq -r --arg n "$name" '.assets[] | select(.name==$n) | .id')
+            if [ -n "$aid" ] && [ "$aid" != "null" ]; then
+              curl -s -X DELETE -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/$REPO/releases/assets/$aid"
+            fi
+            test -s "$f" || { echo "::error::$f missing or empty"; exit 1; }
+            echo "Uploading $name"
+            curl -sS --fail-with-body -X POST \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"$f" \
+              "${UPLOAD_URL}?name=$name"
+          done

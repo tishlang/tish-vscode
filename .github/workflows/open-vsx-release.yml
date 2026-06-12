@@ -1,5 +1,5 @@
 # Publish to Open VSX Registry when a GitHub release is promoted from prerelease to full release.
-# Downloads the VSIX from the release (no rebuild). Same trigger model as vscode-release.yml.
+# Publishes every platform-specific VSIX from the release (no rebuild). Same trigger as vscode-release.yml.
 
 name: Open VSX release
 
@@ -13,19 +13,22 @@ jobs:
     if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     steps:
-      - name: Download VSIX from release
+      - name: Download platform VSIXes from release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ASSET_URL=$(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | select(.name == "tish.vsix") | .url')
-          if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then
-            echo "::error::Release has no asset tish.vsix. Promote the prerelease (created on main merge by CI workflow) to full release."
-            exit 1
-          fi
-          curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/octet-stream" "$ASSET_URL" -o tish.vsix
+          mkdir -p vsix
+          echo '${{ toJSON(github.event.release.assets) }}' \
+            | jq -r '.[] | select(.name | test("^tish-.*\\.vsix$")) | "\(.name)\t\(.url)"' > assets.tsv
+          [ -s assets.tsv ] || { echo "::error::Release has no tish-<platform>.vsix assets. Promote the prerelease created by the CI workflow."; exit 1; }
+          while IFS=$'\t' read -r name url; do
+            echo "Downloading $name"
+            curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/octet-stream" "$url" -o "vsix/$name"
+          done < assets.tsv
+          ls -la vsix/
 
       # GitHub secret: VSX_TOKEN. ovsx expects OVSX_PAT (we pass the same value).
-      - name: Publish to Open VSX Registry
+      - name: Publish each platform VSIX to Open VSX Registry
         env:
           OVSX_PAT: ${{ secrets.VSX_TOKEN }}
         run: |
@@ -33,4 +36,9 @@ jobs:
             echo "::error::Set repository secret VSX_TOKEN (https://open-vsx.org/user-settings/tokens)."
             exit 1
           fi
-          npx --yes ovsx publish tish.vsix
+          # Each VSIX carries its own --target metadata; publish them all so Open VSX serves the
+          # right binary per platform. --target is read from the package.
+          for f in vsix/*.vsix; do
+            echo "Publishing $f"
+            npx --yes ovsx publish "$f"
+          done

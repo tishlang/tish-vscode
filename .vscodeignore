@@ -1,6 +1,7 @@
 .vscode/**
 .vscode-test/**
 src/**
+test/**
 tsconfig.json
 **/*.map
 .gitignore
@@ -11,3 +12,6 @@ example/**
 docs/**
 scripts/**
 *.vsix
+# JS deps are bundled into dist/extension.js by esbuild, so node_modules is not shipped.
+# The tish-lsp binary lives in server/ (NOT node_modules) and IS shipped.
+node_modules/**
