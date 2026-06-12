@@ -8,7 +8,7 @@ Syntax highlighting, snippets, **tish-lsp** (downloaded automatically), and buil
 |---------|---------|
 | **Languages** | **Tish** (`tish`): `.tish` only; JSX uses the same grammar and LSP as plain Tish. |
 | **Snippets** | `fn`, `afn`, `for`, `try`, `import`, … |
-| **LSP** | First launch downloads `tish-lsp` from **Tish GitHub Releases** (cached under global storage). No Rust toolchain required. Optional overrides: `tish.languageServerPath`, `tish.languageServerDownload.url`, or PATH. Release **v0.1.1+** ships scope-aware go-to-definition, hover, references, rename, and lexical completion. |
+| **LSP** | First launch downloads `tish-lsp` from **Tish GitHub Releases** (cached under global storage). No Rust toolchain required. Optional overrides: `tish.languageServerPath`, `tish.languageServerDownload.url`, or PATH. Pinned to **tish `v2.0.3`** (tish/lattish 2.x): scope-aware go-to-definition, hover, references, rename, lexical completion, diagnostics (`tishlang_lint`), and formatting (`tishlang_fmt`). |
 | **Format on save** | **Off by default** (`tish.format.enable`). Enabling it runs **tish-fmt** via the server: it does **not** keep comments and normalizes layout (JSX gets re-indented). Use **Format Document** manually when you want that. |
 | **Tasks** | Example tasks: run file, native compile (see below) |
 | **Problem matchers** | `tish-compile`, `tish-rustc` for compile output |

@@ -114,7 +114,7 @@ function readManifest(): TishLspManifest {
   };
   return {
     downloadRepo: pkg.tishLsp?.downloadRepo ?? "tishlang/tish",
-    releaseTag: pkg.tishLsp?.releaseTag ?? "v0.1.0",
+    releaseTag: pkg.tishLsp?.releaseTag ?? "v2.0.3",
   };
 }
 

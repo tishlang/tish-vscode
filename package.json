@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "tishLsp": {
     "downloadRepo": "tishlang/tish",
-    "releaseTag": "v0.1.1"
+    "releaseTag": "v2.0.3"
   },
   "publisher": "tish",
   "license": "PIF",
