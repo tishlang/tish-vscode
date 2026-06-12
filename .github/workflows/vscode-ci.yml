@@ -140,8 +140,12 @@ jobs:
       - run: npm ci
 
       - name: Run tests and example verify
+        # TISH_BIN_DIR (which example-verify.cjs checks before PATH) instead of $GITHUB_PATH:
+        # appending to $GITHUB_PATH only affects *subsequent* steps, so the binaries built above
+        # were not on PATH for example:verify in this same step (which() returned null for all 3).
+        env:
+          TISH_BIN_DIR: ${{ github.workspace }}/../tish/target/release
         run: |
-          echo "$GITHUB_WORKSPACE/../tish/target/release" >> "$GITHUB_PATH"
           npm test
           npm run example:verify
 
