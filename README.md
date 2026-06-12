@@ -133,4 +133,4 @@ Same pattern as [tish](https://github.com/tishlang/tish): CI workflow plus separ
 1. **`VSCE_PAT`** — Visual Studio Marketplace (`vscode-release`).
 2. **`VSX_TOKEN`** — Open VSX ([create token](https://open-vsx.org/user-settings/tokens); sign publisher agreement first).
 3. **Conventional commits** — feat/fix/perf/BREAKING CHANGE required for main merge.
-4. Align **`tishLsp.releaseTag`** with Tish’s GitHub release that ships `tish-lsp` binaries.
+4. Bump the **`@tishlang/tish-lsp`** devDependency to ship a newer language server; each platform `.vsix` bundles that version’s `tish-lsp`.
