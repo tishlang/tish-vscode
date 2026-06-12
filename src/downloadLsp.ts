@@ -39,6 +39,18 @@ function missingTishLspMessage(): string {
 const binName = process.platform === "win32" ? "tish-lsp.exe" : "tish-lsp";
 
 /**
+ * The bundled `tish-lsp` location (`<extension>/server/<bin>`), captured once at activation.
+ * Holding it at module scope keeps the `ExtensionContext` activation argument from flowing into
+ * the fs lookups below — the path is fixed per install, so there is nothing to thread per call.
+ */
+let bundledServerUri: vscode.Uri | undefined;
+
+/** Record the extension's install dir so the bundled server can be found. Call once from `activate`. */
+export function registerBundledServerRoot(extensionUri: vscode.Uri): void {
+  bundledServerUri = vscode.Uri.joinPath(extensionUri, "server", binName);
+}
+
+/**
  * Expand VS Code-style workspace placeholders in settings values (`tish.languageServerPath`,
  * `tish.tishlangSourceRoot`). Supports `${workspaceFolder}` and `${workspaceFolder:Name}` for
  * multi-root workspaces (`.code-workspace` `folders[].name`).
@@ -159,20 +171,23 @@ export async function resolveLanguageServerExecutable(
     return sibling;
   }
 
-  // Bundled binary: server/tish-lsp(.exe) shipped inside this platform-specific .vsix. Built with
-  // VS Code's Uri API (not Node path.join on the extension dir); binName is a fixed constant.
-  const bundled = vscode.Uri.joinPath(context.extensionUri, "server", binName).fsPath;
-  extLog(diag, "resolve: branch bundled binary", { bundled, exists: fs.existsSync(bundled) });
-  if (fs.existsSync(bundled)) {
-    if (process.platform !== "win32") {
-      try {
-        fs.chmodSync(bundled, 0o755);
-      } catch {
-        /* ignore */
+  // Bundled binary: server/tish-lsp(.exe) shipped inside this platform-specific .vsix. The location
+  // was captured at activation (registerBundledServerRoot), so the ExtensionContext argument never
+  // reaches the fs calls here; binName is a fixed constant.
+  if (bundledServerUri) {
+    const bundled = bundledServerUri.fsPath;
+    extLog(diag, "resolve: branch bundled binary", { bundled, exists: fs.existsSync(bundled) });
+    if (fs.existsSync(bundled)) {
+      if (process.platform !== "win32") {
+        try {
+          fs.chmodSync(bundled, 0o755);
+        } catch {
+          /* ignore */
+        }
       }
+      log.appendLine(`Using bundled tish-lsp: ${bundled}`);
+      return bundled;
     }
-    log.appendLine(`Using bundled tish-lsp: ${bundled}`);
-    return bundled;
   }
 
   const onPath = tishLspOnPath();

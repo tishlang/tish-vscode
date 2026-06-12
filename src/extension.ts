@@ -6,7 +6,11 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-import { expandWorkspaceVariablesInPath, resolveLanguageServerExecutable } from "./downloadLsp";
+import {
+  expandWorkspaceVariablesInPath,
+  registerBundledServerRoot,
+  resolveLanguageServerExecutable,
+} from "./downloadLsp";
 import { extLog, extensionDebugEnabled } from "./extDebug";
 import { registerJsSourceMapDefinition } from "./jsSourceMapDefinition";
 import { isProbablyPath } from "./serverPath";
@@ -36,6 +40,9 @@ export function activate(context: vscode.ExtensionContext): void {
   log.appendLine(
     'Tish: this channel is for the language server process (downloads, “tish-lsp started”, traces). Extension boot / [tish-ext] debug → Output → “Tish Extension”.'
   );
+
+  // Capture the install dir once so bundled-server lookups don't thread the context into fs calls.
+  registerBundledServerRoot(context.extensionUri);
 
   registerJsSourceMapDefinition(context);
 
