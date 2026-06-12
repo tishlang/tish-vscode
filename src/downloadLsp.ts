@@ -3,7 +3,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { extLog } from "./extDebug";
-import { platformServerId } from "./serverPath";
 
 /** Resolve `tish-lsp` to an absolute path when it exists on PATH (spawn is more reliable). */
 function tishLspOnPath(): string | undefined {
@@ -30,11 +29,10 @@ function tishLspOnPath(): string | undefined {
 
 function missingTishLspMessage(): string {
   return (
-    "tish-lsp was not found. The extension is meant to download it automatically. Try: " +
-    '(1) enable "Tish › Language Server Download: Enable" (tish.languageServerDownload.enable), then Reload Window; ' +
-    "(2) set tish.languageServerDownload.url to a direct binary URL if your network blocks GitHub; " +
-    '(3) set "Tish › Language Server Path" (tish.languageServerPath) to a prebuilt tish-lsp you obtained from GitHub Releases; ' +
-    "(4) put a working tish-lsp on PATH as a last resort."
+    "tish-lsp was not found. It is normally bundled with the extension (server/tish-lsp). " +
+    "If this build is missing it (an unsupported OS/arch, or a dev build), either set " +
+    '"Tish › Language Server Path" (tish.languageServerPath) to a tish-lsp binary, put tish-lsp on ' +
+    "PATH, or install one with: npm i -g @tishlang/tish-lsp."
   );
 }
 
@@ -77,7 +75,7 @@ function languageServerPathFromEnv(): string | undefined {
 
 /**
  * In extension development, use a locally built binary from a sibling checkout of
- * the compiler repo (`tish-vscode` next to `tish`) so F5 works without GitHub assets.
+ * the compiler repo (`tish-vscode` next to `tish`) so F5 works against your own build.
  */
 function languageServerPathSiblingDev(
   context: vscode.ExtensionContext,
@@ -102,38 +100,14 @@ function languageServerPathSiblingDev(
   return undefined;
 }
 
-export interface TishLspManifest {
-  downloadRepo: string;
-  releaseTag: string;
-}
-
-function readManifest(): TishLspManifest {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pkg = require("../package.json") as {
-    tishLsp?: Partial<TishLspManifest>;
-  };
-  return {
-    downloadRepo: pkg.tishLsp?.downloadRepo ?? "tishlang/tish",
-    releaseTag: pkg.tishLsp?.releaseTag ?? "v2.0.3",
-  };
-}
-
-function assetBaseName(platformId: string): string {
-  return binName === "tish-lsp.exe"
-    ? `tish-lsp-${platformId}.exe`
-    : `tish-lsp-${platformId}`;
-}
-
-function releaseDownloadUrl(repo: string, tag: string, baseName: string): string {
-  return `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(baseName)}`;
-}
-
 /**
- * Resolution order (end users rely on GitHub download; no compiler build required):
- * workspace `languageServerPath` → `TISH_LANGUAGE_SERVER_PATH` (only if that file exists;
- * missing env path is ignored so download can run) → sibling `../tish/target/.../tish-lsp`
- * (extension Development host only) → GitHub download (cache + fetch when enabled) →
- * `tish-lsp` on PATH.
+ * Resolve the tish-lsp executable. The binary is **bundled** with the extension — each
+ * platform-specific .vsix ships `server/tish-lsp(.exe)`, staged from the pinned
+ * `@tishlang/tish-lsp` npm devDependency at build time. No download, no compiler required.
+ *
+ * Resolution order: workspace `languageServerPath` → `TISH_LANGUAGE_SERVER_PATH` (only if that file
+ * exists) → sibling `../tish/target/.../tish-lsp` (extension Development host only) → the bundled
+ * `server/tish-lsp` → `tish-lsp` on PATH.
  */
 export async function resolveLanguageServerExecutable(
   context: vscode.ExtensionContext,
@@ -143,7 +117,7 @@ export async function resolveLanguageServerExecutable(
 ): Promise<string> {
   extLog(
     diag,
-    "resolve: order is languageServerPath → TISH_LANGUAGE_SERVER_PATH (if exists) → sibling dev → download → PATH",
+    "resolve: order is languageServerPath → TISH_LANGUAGE_SERVER_PATH (if exists) → sibling dev → bundled → PATH",
     {}
   );
 
@@ -172,7 +146,7 @@ export async function resolveLanguageServerExecutable(
       return fromEnv;
     }
     log.appendLine(
-      `Tish: TISH_LANGUAGE_SERVER_PATH is set but file is missing (${fromEnv}); continuing with automatic download / PATH.`
+      `Tish: TISH_LANGUAGE_SERVER_PATH is set but file is missing (${fromEnv}); using the bundled server / PATH.`
     );
     extLog(diag, "resolve: TISH_LANGUAGE_SERVER_PATH missing on disk; fall through", { fromEnv });
   }
@@ -183,97 +157,19 @@ export async function resolveLanguageServerExecutable(
     return sibling;
   }
 
-  const dl = config.get<boolean>("languageServerDownload.enable") ?? true;
-  const platformId = platformServerId();
-  extLog(diag, "resolve: download / PATH gate", { dl, platformId });
-  if (dl && platformId) {
-    const tag =
-      config.get<string>("languageServerDownload.releaseTag")?.trim() ||
-      readManifest().releaseTag;
-    const repo =
-      config.get<string>("languageServerDownload.repo")?.trim() ||
-      readManifest().downloadRepo;
-    const base = assetBaseName(platformId);
-    const cacheDir = path.join(context.globalStorageUri.fsPath, "tish-lsp", tag);
-    const dest = path.join(
-      cacheDir,
-      process.platform === "win32" ? "tish-lsp.exe" : "tish-lsp"
-    );
-
-    extLog(diag, "resolve: download branch", { repo, tag, base, cacheDir, dest, cacheHit: fs.existsSync(dest) });
-
-    if (fs.existsSync(dest)) {
-      if (process.platform !== "win32") {
-        try {
-          fs.chmodSync(dest, 0o755);
-        } catch {
-          /* ignore */
-        }
+  // Bundled binary: server/tish-lsp(.exe) shipped inside this platform-specific .vsix.
+  const bundled = path.join(context.extensionPath, "server", binName);
+  extLog(diag, "resolve: branch bundled binary", { bundled, exists: fs.existsSync(bundled) });
+  if (fs.existsSync(bundled)) {
+    if (process.platform !== "win32") {
+      try {
+        fs.chmodSync(bundled, 0o755);
+      } catch {
+        /* ignore */
       }
-      extLog(diag, "resolve: using cached download binary", { dest });
-      return dest;
     }
-
-    const urlOverride = config.get<string>("languageServerDownload.url")?.trim();
-    const url = urlOverride || releaseDownloadUrl(repo, tag, base);
-    log.appendLine(`Downloading tish-lsp: ${url}`);
-    extLog(diag, "resolve: fetching release asset", { url, hasUrlOverride: Boolean(urlOverride) });
-
-    const ac = new AbortController();
-    await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Tish: downloading language server (one-time)",
-        cancellable: true,
-      },
-      async (progress, token) => {
-        const sub = token.onCancellationRequested(() => ac.abort());
-        const tmp = `${dest}.part`;
-        try {
-          progress.report({ message: "Fetching…" });
-          const res = await fetch(url, {
-            signal: ac.signal,
-            redirect: "follow",
-            headers: { "User-Agent": "tish-vscode-extension" },
-          });
-          if (!res.ok) {
-            const baseMsg = `HTTP ${res.status}: could not download "${base}" from https://github.com/${repo}/releases/tag/${tag}`;
-            const hint404 =
-              res.status === 404
-                ? " No file at that URL (wrong or unpublished release tag, private repo, or assets not uploaded yet). Fix: pick a tag that has `tish-lsp-<platform>` on GitHub Releases, set tish.languageServerDownload.releaseTag / .repo, or set tish.languageServerDownload.url to a direct binary URL. Optionally set tish.languageServerPath to a binary you downloaded by hand. See docs/lsp-release-assets.md for expected asset names."
-                : "";
-            throw new Error(baseMsg + "." + hint404);
-          }
-          const buf = Buffer.from(await res.arrayBuffer());
-          progress.report({ message: "Installing…" });
-          await fs.promises.mkdir(cacheDir, { recursive: true });
-          await fs.promises.writeFile(tmp, buf);
-          await fs.promises.rename(tmp, dest);
-          if (process.platform !== "win32") {
-            fs.chmodSync(dest, 0o755);
-          }
-        } catch (e) {
-          await fs.promises.unlink(tmp).catch(() => undefined);
-          throw e;
-        } finally {
-          sub.dispose();
-        }
-      }
-    );
-
-    extLog(diag, "resolve: download finished; using binary", { dest });
-    return dest;
-  } else {
-    extLog(diag, "resolve: skipping GitHub download branch", { dl, platformId });
-    if (!platformId) {
-      log.appendLine(
-        "Tish: no prebuilt GitHub asset id for this OS/architecture; automatic download is skipped. Install a matching tish-lsp and set tish.languageServerPath, or use tish.languageServerDownload.url."
-      );
-    } else if (!dl) {
-      log.appendLine(
-        'Tish: language server download is disabled (tish.languageServerDownload.enable). Enable it for automatic binaries, or set tish.languageServerPath / PATH.'
-      );
-    }
+    log.appendLine(`Using bundled tish-lsp: ${bundled}`);
+    return bundled;
   }
 
   const onPath = tishLspOnPath();
@@ -282,6 +178,7 @@ export async function resolveLanguageServerExecutable(
     log.appendLine(`Using tish-lsp from PATH: ${onPath}`);
     return onPath;
   }
+
   extLog(diag, "resolve: no tish-lsp found; throwing", {});
   throw new Error(missingTishLspMessage());
 }

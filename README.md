@@ -1,6 +1,6 @@
 # Tish — VS Code / Cursor extension
 
-Syntax highlighting, snippets, **tish-lsp** (downloaded automatically), and build tasks for the [Tish](https://github.com/tishlang/tish) language.
+Syntax highlighting, snippets, a **bundled tish-lsp** language server, and build tasks for the [Tish](https://github.com/tishlang/tish) language.
 
 ## Features
 
@@ -8,7 +8,7 @@ Syntax highlighting, snippets, **tish-lsp** (downloaded automatically), and buil
 |---------|---------|
 | **Languages** | **Tish** (`tish`): `.tish` only; JSX uses the same grammar and LSP as plain Tish. |
 | **Snippets** | `fn`, `afn`, `for`, `try`, `import`, … |
-| **LSP** | First launch downloads `tish-lsp` from **Tish GitHub Releases** (cached under global storage). No Rust toolchain required. Optional overrides: `tish.languageServerPath`, `tish.languageServerDownload.url`, or PATH. Pinned to **tish `v2.0.3`** (tish/lattish 2.x): scope-aware go-to-definition, hover, references, rename, lexical completion, diagnostics (`tishlang_lint`), and formatting (`tishlang_fmt`). |
+| **LSP** | The `tish-lsp` binary is **bundled in the extension** (platform-specific `.vsix`) — no download, no Rust toolchain. Pinned via the `@tishlang/tish-lsp` dependency (currently **2.1.0**, tish/lattish 2.x): scope-aware go-to-definition, hover, references, rename, lexical completion, diagnostics (`tishlang_lint`), and formatting (`tishlang_fmt`). Override with `tish.languageServerPath` or `tish-lsp` on PATH. |
 | **Format on save** | **Off by default** (`tish.format.enable`). Enabling it runs **tish-fmt** via the server: it does **not** keep comments and normalizes layout (JSX gets re-indented). Use **Format Document** manually when you want that. |
 | **Tasks** | Example tasks: run file, native compile (see below) |
 | **Problem matchers** | `tish-compile`, `tish-rustc` for compile output |
@@ -19,49 +19,41 @@ Syntax highlighting, snippets, **tish-lsp** (downloaded automatically), and buil
 
 1. **Confirm the extension is actually installed** — In **Extensions**, search **Tish** (`tish.tish-extension`). Opening only the `tish` compiler repo does **not** load the VS Code extension from disk; you must **install** it (marketplace / Open VSX / “Install from VSIX”) or use **Run Extension** from a checkout of `tish-vscode`. The `tish` repo includes `.vscode/extensions.json` recommending this extension when your editor supports it.
 2. **Prove activation** — Command Palette → **“Tish: Show Extension Output”** (or **“Tish: Show Language Server Output”**). In **Output → “Tish Extension”** you should see `Tish extension activated` within a few lines. If those commands are missing, the extension is not loaded. **Developer: Show Running Extensions** should list **Tish**.
-3. **Workspace Trust (Restricted Mode)** — This extension declares **limited** trust support: syntax and the **automatic `tish-lsp` download** still work from User-level defaults. **Trust the workspace** only if you want the repo to supply workspace-level download URL/tag overrides.
+3. **Workspace Trust (Restricted Mode)** — This extension declares **limited** trust support: syntax and the **bundled `tish-lsp`** still work. A workspace-level `tish.languageServerPath` (which could point at an arbitrary executable) is ignored unless you **trust the workspace**.
 4. **Language mode** — Bottom-right must show **Tish** (not Plain Text). Save as `*.tish` or use **Change Language Mode**.
 
 ### Go to definition / hover (like TypeScript)
 
 These come from **tish-lsp**, not from TextMate grammar. After opening a `.tish` file, check **Output → Tish Language Server** for `tish-lsp ready`.
 
-1. **Use a current binary** — Bump **`tish.languageServerDownload.releaseTag`** to a release that ships `tish-lsp` for your platform, reload the window, or set **`tish.languageServerPath`** to a prebuilt `tish-lsp` you downloaded from GitHub Releases.
+1. **Bundled binary** — `tish-lsp` ships inside the extension; no install needed. To override (a custom build, or an unsupported arch) set **`tish.languageServerPath`** to a `tish-lsp` binary, or put one on PATH (`npm i -g @tishlang/tish-lsp`), then reload.
 2. **Cursor on an identifier** — Cmd/Ctrl+click or **Go to Definition** on the **name** of a call/local (`foo` in `foo()`), not on punctuation.
 3. **Trace** — Set **`tish.trace.server`** to `verbose` to confirm `textDocument/definition` / `textDocument/hover` requests in the output channel.
 
 **Lint vs format:** Red/yellow squiggles are **diagnostics** (parse + `tish-lint`). **Format document** / format-on-save uses **`tish_fmt`** and is lossy (comments removed). Keep format-on-save off unless you want normalized code.
 
-- **Language server** — No manual install. On first use, the extension downloads the binary for your OS (see [docs/lsp-release-assets.md](docs/lsp-release-assets.md) for asset names).
+- **Language server** — No manual install, no download: the `tish-lsp` binary for your OS/arch ships inside the platform-specific `.vsix`.
 - **`tish` on PATH** — Only if you use **Run/Compile** tasks.
-- Air-gapped / custom builds: set **`tish.languageServerPath`** or **`tish.languageServerDownload.url`**, or turn off download and use `tish-lsp` on PATH.
+- Custom builds: set **`tish.languageServerPath`** to your own `tish-lsp`, or put one on PATH.
 
 ### `spawn tish-lsp ENOENT` / LSP won’t start
 
-That means the editor tried to run `tish-lsp` but it isn’t available. Common causes:
+The bundled `tish-lsp` (`server/tish-lsp` inside the extension) couldn’t run. Common causes:
 
-1. **Download disabled** — In Settings, enable **`Tish › Language Server Download: Enable`** (`tish.languageServerDownload.enable`), then **Reload Window**. The extension will fetch the binary once and cache it.
-2. **GUI apps don’t see your shell PATH** — Even if `tish-lsp` works in Terminal, Cursor/VS Code may not. Set **`tish.languageServerPath`** to the full path of the binary, or rely on automatic download.
-3. **Unsupported OS/arch for bundled download** — Set **`tish.languageServerPath`** or **`tish.languageServerDownload.url`** to a matching binary.
-
-### HTTP 404 when downloading `tish-lsp-*`
-
-The extension pulls binaries from **GitHub Releases** (`tish.languageServerDownload.repo` + tag). A **404** means that release URL has no file with that name—often the compiler repo is private, the tag doesn’t exist yet, or CI hasn’t uploaded the assets (see [docs/lsp-release-assets.md](docs/lsp-release-assets.md)).
-
-**Workaround:** Download a matching `tish-lsp-*` asset manually from the [Tish releases](https://github.com/tishlang/tish/releases) page and set **`tish.languageServerPath`** to that file, **or** set **`tish.languageServerDownload.url`** to a direct download URL. Optionally turn off **`tish.languageServerDownload.enable`** so the extension does not retry the broken GitHub URL each session.
+1. **Wrong-platform `.vsix`** — Install from the Marketplace / Open VSX, which serve the platform-specific build automatically. Installing a `.vsix` for another OS/arch by hand ships the wrong binary.
+2. **Unsupported OS/arch** — If there’s no bundled binary for your platform, set **`tish.languageServerPath`** to a `tish-lsp` you built or installed (`npm i -g @tishlang/tish-lsp`), then **Reload Window**.
+3. **Override points nowhere** — If you set `tish.languageServerPath`, make sure it’s an existing, runnable `tish-lsp`.
 
 ## Extension maintainers (this repo)
 
-- Bump **`tishLsp.releaseTag`** in `package.json` when you want users to pull a newer `tish-lsp` from the Tish repo’s releases.
-- The **Tish** repo must publish matching binaries on that tag (see [docs/lsp-release-assets.md](docs/lsp-release-assets.md)).
+- Bump the **`@tishlang/tish-lsp`** devDependency in `package.json` to ship a newer language server, then `npm i`. CI builds one platform-specific `.vsix` per target, each bundling that platform’s `tish-lsp` (staged from the npm package by `scripts/stage-lsp.cjs` via `TISH_LSP_TARGET`).
+- The binary is **bundled, not downloaded** — there is no runtime fetch.
 
 ## Configuration
 
 | Setting | Description |
 |---------|-------------|
-| `tish.languageServerPath` | Path to `tish-lsp` (overrides everything) |
-| `tish.languageServerDownload.enable` | Use GitHub download (default on) |
-| `tish.languageServerDownload.repo` / `releaseTag` / `url` | Override download source |
+| `tish.languageServerPath` | Path to a `tish-lsp` that overrides the bundled one |
 | `tish.trace.server` | LSP trace |
 | `tish.format.enable` | Format on save |
 

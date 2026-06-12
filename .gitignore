@@ -1,5 +1,6 @@
 node_modules/
 dist/
+server/
 *.vsix
 .DS_Store
 example/scratch/
