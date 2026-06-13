@@ -115,6 +115,13 @@
     },
     "keywords": {
       "patterns": [
+        {
+          "match": "\\b(type|interface)\\s+([A-Za-z_$][A-Za-z0-9_$]*)",
+          "captures": {
+            "1": { "name": "storage.type.ts" },
+            "2": { "name": "entity.name.type.ts" }
+          }
+        },
         { "name": "keyword.control.conditional.ts", "match": "\\b(if|else)\\b" },
         { "name": "keyword.control.loop.ts", "match": "\\b(while|for|do)\\b" },
         {
@@ -127,11 +134,16 @@
         { "name": "keyword.control.import.ts", "match": "\\b(import)\\b" },
         { "name": "keyword.control.export.ts", "match": "\\b(export)\\b" },
         { "name": "keyword.control.from.ts", "match": "\\b(from)\\b" },
+        { "name": "keyword.control.as.ts", "match": "\\b(as)\\b" },
+        { "name": "keyword.control.extends.ts", "match": "\\b(extends)\\b" },
         { "name": "keyword.operator.expression.of.ts", "match": "\\b(of)\\b" },
         { "name": "keyword.operator.expression.in.ts", "match": "\\b(in)\\b" },
         { "name": "keyword.operator.expression.typeof.ts", "match": "\\b(typeof)\\b" },
         { "name": "keyword.operator.expression.void.ts", "match": "\\b(void)\\b" },
+        { "name": "keyword.operator.expression.delete.ts", "match": "\\b(delete)\\b" },
+        { "name": "keyword.operator.new.ts", "match": "\\b(new)\\b" },
         { "name": "storage.modifier.async.ts", "match": "\\b(async)\\b" },
+        { "name": "storage.modifier.declare.ts", "match": "\\b(declare)\\b" },
         { "name": "storage.type.function.ts", "match": "\\b(fn|function)\\b" },
         { "name": "storage.type.ts", "match": "\\b(let|const)\\b" },
         { "name": "constant.language.boolean.true.ts", "match": "\\b(true)\\b" },

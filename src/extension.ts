@@ -150,8 +150,10 @@ export function activate(context: vscode.ExtensionContext): void {
       markdown: { isTrusted: true, supportHtml: false },
     };
 
+    // The client id must be "tish" so vscode-languageclient reads tish.trace.server
+    // (it calls getConfiguration(<id>).get("trace.server")).
     client = new LanguageClient(
-      "tishLanguageServer",
+      "tish",
       "Tish Language Server",
       serverOptions,
       clientOptions
@@ -189,34 +191,49 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("tish")) {
-        void vscode.window.showInformationMessage(
-          "Reload the window for Tish language server settings to take effect."
-        );
+      // Only the server path and the source-root (sent as initializationOptions at startup) require
+      // a restart. trace.server, format.enable, and debug.extension all take effect live.
+      if (
+        e.affectsConfiguration("tish.languageServerPath") ||
+        e.affectsConfiguration("tish.tishlangSourceRoot")
+      ) {
+        void vscode.window
+          .showInformationMessage(
+            "Reload the window for the Tish language server change to take effect.",
+            "Reload Window"
+          )
+          .then((choice) => {
+            if (choice === "Reload Window") {
+              void vscode.commands.executeCommand("workbench.action.reloadWindow");
+            }
+          });
       }
     })
   );
 
-  const fmt = vscode.workspace.getConfiguration("tish").get<boolean>("format.enable");
-  if (fmt) {
-    context.subscriptions.push(
-      vscode.workspace.onWillSaveTextDocument((e) => {
-        if (e.document.languageId === "tish") {
-          const editor = vscode.window.activeTextEditor;
-          if (editor && editor.document === e.document) {
-            e.waitUntil(
-              vscode.commands
-                .executeCommand("editor.action.formatDocument")
-                .then(
-                  () => undefined,
-                  () => undefined
-                )
-            );
-          }
-        }
-      })
-    );
-  }
+  // Format on save. The listener is always registered and re-reads tish.format.enable on each save,
+  // so toggling the setting takes effect immediately (no window reload required).
+  context.subscriptions.push(
+    vscode.workspace.onWillSaveTextDocument((e) => {
+      if (e.document.languageId !== "tish") {
+        return;
+      }
+      if (!vscode.workspace.getConfiguration("tish").get<boolean>("format.enable")) {
+        return;
+      }
+      const editor = vscode.window.activeTextEditor;
+      if (editor && editor.document === e.document) {
+        e.waitUntil(
+          vscode.commands
+            .executeCommand("editor.action.formatDocument")
+            .then(
+              () => undefined,
+              () => undefined
+            )
+        );
+      }
+    })
+  );
 }
 
 export function deactivate(): Thenable<void> | undefined {

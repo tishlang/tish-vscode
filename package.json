@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "publisher": "tish",
   "license": "PIF",
+  "icon": "icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/tishlang/tish-vscode"
@@ -93,17 +94,27 @@
       {
         "name": "tish-compile",
         "owner": "tish",
-        "fileLocation": [
-          "relative",
-          "${workspaceFolder}"
-        ],
+        "fileLocation": "autoDetect",
         "pattern": {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)$",
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning)(?:\\s+\\[[\\w-]+\\]|:)\\s+(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
           "severity": 4,
           "message": 5
+        }
+      },
+      {
+        "name": "tish-run",
+        "owner": "tish",
+        "fileLocation": "autoDetect",
+        "severity": "error",
+        "pattern": {
+          "regexp": "^Error: .*? in (.+?): (.+) at Span \\{ start: \\((\\d+), (\\d+)\\)",
+          "file": 1,
+          "message": 2,
+          "line": 3,
+          "column": 4
         }
       },
       {
