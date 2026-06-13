@@ -35,5 +35,24 @@
     "increaseIndentPattern": "^\\s*((fn|async\\s+fn|if|else|for|while|do|try|catch|finally|switch|case|default)\\b.*|\\{[^}]*|\\([^)]*$)",
     "decreaseIndentPattern": "^\\s*(\\}|\\)|case\\s|default\\s)"
   },
+  "onEnterRules": [
+    {
+      "beforeText": "^\\s*/\\*\\*(?!/)([^\\*]|\\*(?!/))*$",
+      "afterText": "^\\s*\\*/$",
+      "action": { "indent": "indentOutdent", "appendText": " * " }
+    },
+    {
+      "beforeText": "^\\s*/\\*\\*(?!/)([^\\*]|\\*(?!/))*$",
+      "action": { "indent": "none", "appendText": " * " }
+    },
+    {
+      "beforeText": "^\\s*\\*(\\s([^\\*]|\\*(?!/))*)?$",
+      "action": { "indent": "none", "appendText": "* " }
+    },
+    {
+      "beforeText": "^\\s*\\*/\\s*$",
+      "action": { "indent": "none", "removeText": 1 }
+    }
+  ],
   "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>/\\?\\s]+)"
 }
