@@ -2,68 +2,138 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Tish",
   "scopeName": "source.tish",
-  "patterns": [{ "include": "#statements" }],
+  "patterns": [
+    {
+      "include": "#statements"
+    }
+  ],
   "repository": {
     "statements": {
       "patterns": [
-        { "include": "#comments" },
-        { "include": "#import-export" },
-        { "include": "#type-alias" },
-        { "include": "#function-declaration" },
-        { "include": "#variable-declaration" },
-        { "include": "#expression" }
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#import-export"
+        },
+        {
+          "include": "#type-alias"
+        },
+        {
+          "include": "#function-declaration"
+        },
+        {
+          "include": "#variable-declaration"
+        },
+        {
+          "include": "#expression"
+        }
       ]
     },
     "expression": {
       "patterns": [
-        { "include": "#comments" },
-        { "include": "#regex" },
-        { "include": "#strings" },
-        { "include": "#template" },
-        { "include": "#jsx" },
-        { "include": "#function-expression" },
-        { "include": "#arrow-function" },
-        { "include": "#keywords" },
-        { "include": "#language-constants" },
-        { "include": "#numbers" },
-        { "include": "#new-expression" },
-        { "include": "#property-access" },
-        { "include": "#object-key" },
-        { "include": "#function-call" },
-        { "include": "#type-cast" },
-        { "include": "#operators" },
-        { "include": "#brackets" },
-        { "include": "#punctuation" },
-        { "include": "#identifiers" }
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#regex"
+        },
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#template"
+        },
+        {
+          "include": "#jsx"
+        },
+        {
+          "include": "#function-expression"
+        },
+        {
+          "include": "#arrow-function"
+        },
+        {
+          "include": "#keywords"
+        },
+        {
+          "include": "#language-constants"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#new-expression"
+        },
+        {
+          "include": "#property-access"
+        },
+        {
+          "include": "#object-key"
+        },
+        {
+          "include": "#function-call"
+        },
+        {
+          "include": "#type-cast"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#brackets"
+        },
+        {
+          "include": "#punctuation"
+        },
+        {
+          "include": "#identifiers"
+        }
       ]
     },
     "comments": {
       "patterns": [
         {
-          "name": "comment.block.documentation.ts",
+          "name": "comment.block.documentation.js",
           "begin": "/\\*\\*(?!/)",
           "end": "\\*/",
-          "captures": { "0": { "name": "punctuation.definition.comment.ts" } },
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.js"
+            }
+          },
           "patterns": [
             {
               "match": "(@)(param|returns?|type|typedef|example|deprecated|see|throws|template|todo)\\b",
               "captures": {
-                "1": { "name": "punctuation.definition.block.tag.jsdoc" },
-                "2": { "name": "storage.type.class.jsdoc" }
+                "1": {
+                  "name": "punctuation.definition.block.tag.jsdoc"
+                },
+                "2": {
+                  "name": "storage.type.class.jsdoc"
+                }
               }
             }
           ]
         },
         {
-          "name": "comment.block.ts",
+          "name": "comment.block.js",
           "begin": "/\\*",
           "end": "\\*/",
-          "captures": { "0": { "name": "punctuation.definition.comment.ts" } }
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.js"
+            }
+          }
         },
         {
-          "name": "comment.line.double-slash.ts",
+          "name": "comment.line.double-slash.js",
           "begin": "//",
-          "beginCaptures": { "0": { "name": "punctuation.definition.comment.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.js"
+            }
+          },
           "end": "$"
         }
       ]
@@ -72,206 +142,496 @@
       "patterns": [
         {
           "begin": "\\b(import)\\b",
-          "beginCaptures": { "1": { "name": "keyword.control.import.ts" } },
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.import.js"
+            }
+          },
           "end": "(?<=[\"'])|(?=$)",
-          "name": "meta.import.ts",
+          "name": "meta.import.js",
           "patterns": [
-            { "include": "#comments" },
-            { "include": "#strings" },
-            { "name": "keyword.control.from.ts", "match": "\\bfrom\\b" },
-            { "name": "keyword.control.as.ts", "match": "\\bas\\b" },
-            { "name": "keyword.control.default.ts", "match": "\\bdefault\\b" },
-            { "name": "keyword.operator.type.ts", "match": "\\btype\\b" },
-            { "name": "constant.language.import-export-all.ts", "match": "\\*" },
-            { "name": "punctuation.definition.block.ts", "match": "[{}]" },
-            { "name": "punctuation.separator.comma.ts", "match": "," },
-            { "name": "variable.other.readwrite.alias.ts", "match": "[A-Za-z_$][\\w$]*" }
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#strings"
+            },
+            {
+              "name": "keyword.control.from.js",
+              "match": "\\bfrom\\b"
+            },
+            {
+              "name": "keyword.control.as.js",
+              "match": "\\bas\\b"
+            },
+            {
+              "name": "keyword.control.default.js",
+              "match": "\\bdefault\\b"
+            },
+            {
+              "name": "keyword.operator.type.ts",
+              "match": "\\btype\\b"
+            },
+            {
+              "name": "constant.language.import-export-all.js",
+              "match": "\\*"
+            },
+            {
+              "name": "punctuation.definition.block.js",
+              "match": "[{}]"
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": ","
+            },
+            {
+              "name": "variable.other.readwrite.alias.js",
+              "match": "[A-Za-z_$][\\w$]*"
+            }
           ]
         },
         {
           "match": "\\b(export)\\s+(default)\\b",
           "captures": {
-            "1": { "name": "keyword.control.export.ts" },
-            "2": { "name": "keyword.control.default.ts" }
+            "1": {
+              "name": "keyword.control.export.js"
+            },
+            "2": {
+              "name": "keyword.control.default.js"
+            }
           }
         },
         {
           "begin": "\\b(export)\\s*(?=\\{|\\*)",
-          "beginCaptures": { "1": { "name": "keyword.control.export.ts" } },
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.export.js"
+            }
+          },
           "end": "(?<=[\"'}])(?!\\s*from)|(?=$)",
-          "name": "meta.export.ts",
+          "name": "meta.export.js",
           "patterns": [
-            { "include": "#comments" },
-            { "include": "#strings" },
-            { "name": "keyword.control.from.ts", "match": "\\bfrom\\b" },
-            { "name": "keyword.control.as.ts", "match": "\\bas\\b" },
-            { "name": "constant.language.import-export-all.ts", "match": "\\*" },
-            { "name": "punctuation.definition.block.ts", "match": "[{}]" },
-            { "name": "punctuation.separator.comma.ts", "match": "," },
-            { "name": "variable.other.readwrite.alias.ts", "match": "[A-Za-z_$][\\w$]*" }
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#strings"
+            },
+            {
+              "name": "keyword.control.from.js",
+              "match": "\\bfrom\\b"
+            },
+            {
+              "name": "keyword.control.as.js",
+              "match": "\\bas\\b"
+            },
+            {
+              "name": "constant.language.import-export-all.js",
+              "match": "\\*"
+            },
+            {
+              "name": "punctuation.definition.block.js",
+              "match": "[{}]"
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": ","
+            },
+            {
+              "name": "variable.other.readwrite.alias.js",
+              "match": "[A-Za-z_$][\\w$]*"
+            }
           ]
         },
-        { "name": "keyword.control.export.ts", "match": "\\b(export)\\b" }
+        {
+          "name": "keyword.control.export.js",
+          "match": "\\b(export)\\b"
+        }
       ]
     },
     "type-alias": {
       "begin": "\\b(declare\\s+)?(type|interface)\\s+([A-Za-z_$][\\w$]*)",
       "beginCaptures": {
-        "1": { "name": "storage.modifier.declare.ts" },
-        "2": { "name": "storage.type.ts" },
-        "3": { "name": "entity.name.type.alias.ts" }
+        "1": {
+          "name": "storage.modifier.declare.ts"
+        },
+        "2": {
+          "name": "storage.type.js"
+        },
+        "3": {
+          "name": "entity.name.type.alias.ts"
+        }
       },
       "end": "(?<=\\})|(?<![=|&,<\\s])\\s*$",
       "name": "meta.type.declaration.ts",
       "patterns": [
-        { "include": "#comments" },
-        { "name": "keyword.operator.assignment.ts", "match": "=" },
-        { "name": "storage.modifier.ts", "match": "\\bextends\\b" },
-        { "include": "#type" }
+        {
+          "include": "#comments"
+        },
+        {
+          "name": "keyword.operator.assignment.js",
+          "match": "="
+        },
+        {
+          "name": "storage.modifier.js",
+          "match": "\\bextends\\b"
+        },
+        {
+          "include": "#type"
+        }
       ]
     },
     "type": {
       "patterns": [
-        { "include": "#comments" },
-        { "include": "#strings" },
-        { "name": "support.type.primitive.ts", "match": "\\b(number|string|boolean|null|void|any|never|unknown|object|symbol|bigint|undefined)\\b" },
-        { "name": "constant.language.boolean.ts", "match": "\\b(true|false)\\b" },
-        { "name": "constant.numeric.decimal.ts", "match": "\\b\\d+(\\.\\d+)?\\b" },
-        { "name": "keyword.operator.expression.typeof.ts", "match": "\\b(typeof|keyof)\\b" },
-        { "name": "keyword.operator.type.ts", "match": "[|&]" },
-        { "name": "keyword.operator.type.annotation.ts", "match": ":" },
-        { "name": "keyword.operator.optional.ts", "match": "\\?" },
-        { "name": "keyword.operator.type.ts", "match": "=>" },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#strings"
+        },
+        {
+          "name": "support.type.primitive.ts",
+          "match": "\\b(number|string|boolean|null|void|any|never|unknown|object|symbol|bigint|undefined)\\b"
+        },
+        {
+          "name": "constant.language.boolean.js",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.js",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        },
+        {
+          "name": "keyword.operator.expression.typeof.js",
+          "match": "\\b(typeof|keyof)\\b"
+        },
+        {
+          "name": "keyword.operator.type.ts",
+          "match": "[|&]"
+        },
+        {
+          "name": "keyword.operator.type.annotation.ts",
+          "match": ":"
+        },
+        {
+          "name": "keyword.operator.optional.ts",
+          "match": "\\?"
+        },
+        {
+          "name": "keyword.operator.type.ts",
+          "match": "=>"
+        },
         {
           "begin": "<",
-          "beginCaptures": { "0": { "name": "punctuation.definition.typeparameters.begin.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.typeparameters.begin.ts"
+            }
+          },
           "end": ">",
-          "endCaptures": { "0": { "name": "punctuation.definition.typeparameters.end.ts" } },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.typeparameters.end.ts"
+            }
+          },
           "name": "meta.type.parameters.ts",
-          "patterns": [{ "include": "#type" }, { "name": "punctuation.separator.comma.ts", "match": "," }]
+          "patterns": [
+            {
+              "include": "#type"
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": ","
+            }
+          ]
         },
         {
           "begin": "\\{",
-          "beginCaptures": { "0": { "name": "punctuation.definition.block.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.block.js"
+            }
+          },
           "end": "\\}",
-          "endCaptures": { "0": { "name": "punctuation.definition.block.ts" } },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.block.js"
+            }
+          },
           "name": "meta.object.type.ts",
           "patterns": [
-            { "include": "#comments" },
+            {
+              "include": "#comments"
+            },
             {
               "match": "([A-Za-z_$][\\w$]*)\\s*(\\?)?\\s*(?=:)",
               "captures": {
-                "1": { "name": "variable.object.property.ts" },
-                "2": { "name": "keyword.operator.optional.ts" }
+                "1": {
+                  "name": "variable.object.property.ts"
+                },
+                "2": {
+                  "name": "keyword.operator.optional.ts"
+                }
               }
             },
-            { "include": "#type" },
-            { "name": "punctuation.separator.comma.ts", "match": "[,;]" }
+            {
+              "include": "#type"
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": "[,;]"
+            }
           ]
         },
         {
           "begin": "\\(",
-          "beginCaptures": { "0": { "name": "meta.brace.round.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "meta.brace.round.js"
+            }
+          },
           "end": "\\)",
-          "endCaptures": { "0": { "name": "meta.brace.round.ts" } },
+          "endCaptures": {
+            "0": {
+              "name": "meta.brace.round.js"
+            }
+          },
           "patterns": [
-            { "match": "([A-Za-z_$][\\w$]*)\\s*(\\?)?\\s*(?=:)", "captures": { "1": { "name": "variable.parameter.ts" }, "2": { "name": "keyword.operator.optional.ts" } } },
-            { "include": "#type" },
-            { "name": "punctuation.separator.comma.ts", "match": "," }
+            {
+              "match": "([A-Za-z_$][\\w$]*)\\s*(\\?)?\\s*(?=:)",
+              "captures": {
+                "1": {
+                  "name": "variable.parameter.js"
+                },
+                "2": {
+                  "name": "keyword.operator.optional.ts"
+                }
+              }
+            },
+            {
+              "include": "#type"
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": ","
+            }
           ]
         },
         {
           "begin": "\\[",
-          "beginCaptures": { "0": { "name": "meta.brace.square.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "meta.brace.square.js"
+            }
+          },
           "end": "\\]",
-          "endCaptures": { "0": { "name": "meta.brace.square.ts" } },
-          "patterns": [{ "include": "#type" }, { "name": "punctuation.separator.comma.ts", "match": "," }]
+          "endCaptures": {
+            "0": {
+              "name": "meta.brace.square.js"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#type"
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": ","
+            }
+          ]
         },
-        { "name": "entity.name.type.ts", "match": "[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)*" }
+        {
+          "name": "entity.name.type.ts",
+          "match": "[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)*"
+        }
       ]
     },
     "type-annotation": {
       "begin": "(?<![?:]):(?!:)",
-      "beginCaptures": { "0": { "name": "keyword.operator.type.annotation.ts" } },
+      "beginCaptures": {
+        "0": {
+          "name": "keyword.operator.type.annotation.ts"
+        }
+      },
       "end": "(?=[=,;)\\]}]|$)|(?<=[A-Za-z0-9_$>\\]})])(?=\\s*(?:[,;)=}\\]]|$))",
       "name": "meta.type.annotation.ts",
-      "patterns": [{ "include": "#type" }]
+      "patterns": [
+        {
+          "include": "#type"
+        }
+      ]
     },
     "return-type": {
       "begin": "(?<=\\))\\s*(:)",
-      "beginCaptures": { "1": { "name": "keyword.operator.type.annotation.ts" } },
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.operator.type.annotation.ts"
+        }
+      },
       "end": "(?=\\{|=>|$)",
       "name": "meta.return.type.ts",
-      "patterns": [{ "include": "#type" }]
+      "patterns": [
+        {
+          "include": "#type"
+        }
+      ]
     },
     "type-cast": {
       "match": "\\b(as)\\s+([A-Za-z_$][\\w$]*(?:\\.[A-Za-z_$][\\w$]*)*|\"[^\"]*\"|'[^']*')",
       "captures": {
-        "1": { "name": "keyword.control.as.ts" },
-        "2": { "name": "entity.name.type.ts" }
+        "1": {
+          "name": "keyword.control.as.js"
+        },
+        "2": {
+          "name": "entity.name.type.ts"
+        }
       }
     },
     "parameters": {
       "begin": "\\(",
-      "beginCaptures": { "0": { "name": "punctuation.definition.parameters.begin.ts" } },
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.parameters.begin.js"
+        }
+      },
       "end": "\\)",
-      "endCaptures": { "0": { "name": "punctuation.definition.parameters.end.ts" } },
-      "name": "meta.parameters.ts",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.parameters.end.js"
+        }
+      },
+      "name": "meta.parameters.js",
       "patterns": [
-        { "include": "#comments" },
-        { "include": "#type-annotation" },
-        { "name": "keyword.operator.rest.ts", "match": "\\.\\.\\." },
-        { "name": "keyword.operator.optional.ts", "match": "\\?(?=\\s*:)" },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#type-annotation"
+        },
+        {
+          "name": "keyword.operator.rest.js",
+          "match": "\\.\\.\\."
+        },
+        {
+          "name": "keyword.operator.optional.ts",
+          "match": "\\?(?=\\s*:)"
+        },
         {
           "begin": "=",
-          "beginCaptures": { "0": { "name": "keyword.operator.assignment.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.operator.assignment.js"
+            }
+          },
           "end": "(?=[,)])",
-          "patterns": [{ "include": "#expression" }]
+          "patterns": [
+            {
+              "include": "#expression"
+            }
+          ]
         },
-        { "name": "punctuation.definition.binding-pattern.object.ts", "match": "[{}]" },
-        { "name": "punctuation.definition.binding-pattern.array.ts", "match": "[\\[\\]]" },
-        { "name": "punctuation.separator.comma.ts", "match": "," },
-        { "name": "variable.parameter.ts", "match": "[A-Za-z_$][\\w$]*" }
+        {
+          "name": "punctuation.definition.binding-pattern.object.js",
+          "match": "[{}]"
+        },
+        {
+          "name": "punctuation.definition.binding-pattern.array.js",
+          "match": "[\\[\\]]"
+        },
+        {
+          "name": "punctuation.separator.comma.js",
+          "match": ","
+        },
+        {
+          "name": "variable.parameter.js",
+          "match": "[A-Za-z_$][\\w$]*"
+        }
       ]
     },
     "function-declaration": {
       "begin": "\\b(?:(export)\\s+)?(?:(async)\\s+)?(fn|function)\\s*(\\*)?\\s*([A-Za-z_$][\\w$]*)?\\s*(?=\\(|<)",
       "beginCaptures": {
-        "1": { "name": "keyword.control.export.ts" },
-        "2": { "name": "storage.modifier.async.ts" },
-        "3": { "name": "storage.type.function.ts" },
-        "4": { "name": "keyword.generator.asterisk.ts" },
-        "5": { "name": "entity.name.function.ts" }
+        "1": {
+          "name": "keyword.control.export.js"
+        },
+        "2": {
+          "name": "storage.modifier.async.js"
+        },
+        "3": {
+          "name": "storage.type.function.js"
+        },
+        "4": {
+          "name": "keyword.generator.asterisk.js"
+        },
+        "5": {
+          "name": "entity.name.function.js"
+        }
       },
       "end": "(?<=\\))(?=\\s*(?:\\{|$))|(?=\\{)|(?<=\\))\\s*$",
-      "name": "meta.function.ts",
+      "name": "meta.function.js",
       "patterns": [
-        { "include": "#comments" },
+        {
+          "include": "#comments"
+        },
         {
           "begin": "<",
-          "beginCaptures": { "0": { "name": "punctuation.definition.typeparameters.begin.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.typeparameters.begin.ts"
+            }
+          },
           "end": ">",
-          "endCaptures": { "0": { "name": "punctuation.definition.typeparameters.end.ts" } },
-          "patterns": [{ "include": "#type" }, { "name": "punctuation.separator.comma.ts", "match": "," }]
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.typeparameters.end.ts"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#type"
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": ","
+            }
+          ]
         },
-        { "include": "#parameters" },
-        { "include": "#return-type" }
+        {
+          "include": "#parameters"
+        },
+        {
+          "include": "#return-type"
+        }
       ]
     },
     "function-expression": {
       "begin": "\\b(?:(async)\\s+)?(fn|function)\\s*(\\*)?\\s*([A-Za-z_$][\\w$]*)?\\s*(?=\\()",
       "beginCaptures": {
-        "1": { "name": "storage.modifier.async.ts" },
-        "2": { "name": "storage.type.function.ts" },
-        "3": { "name": "keyword.generator.asterisk.ts" },
-        "4": { "name": "entity.name.function.ts" }
+        "1": {
+          "name": "storage.modifier.async.js"
+        },
+        "2": {
+          "name": "storage.type.function.js"
+        },
+        "3": {
+          "name": "keyword.generator.asterisk.js"
+        },
+        "4": {
+          "name": "entity.name.function.js"
+        }
       },
       "end": "(?<=\\))(?=\\s*(?:\\{|$))|(?=\\{)",
-      "name": "meta.function.expression.ts",
+      "name": "meta.function.expression.js",
       "patterns": [
-        { "include": "#comments" },
-        { "include": "#parameters" },
-        { "include": "#return-type" }
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#parameters"
+        },
+        {
+          "include": "#return-type"
+        }
       ]
     },
     "arrow-function": {
@@ -279,172 +639,443 @@
         {
           "match": "\\b(?:(async)\\s+)?([A-Za-z_$][\\w$]*)\\s*(=>)",
           "captures": {
-            "1": { "name": "storage.modifier.async.ts" },
-            "2": { "name": "variable.parameter.ts" },
-            "3": { "name": "storage.type.function.arrow.ts" }
+            "1": {
+              "name": "storage.modifier.async.js"
+            },
+            "2": {
+              "name": "variable.parameter.js"
+            },
+            "3": {
+              "name": "storage.type.function.arrow.js"
+            }
           }
         },
         {
-          "begin": "\\b(?:(async)\\s+)?(?=\\([^()]*\\)\\s*(?::[^=]*)?=>)",
-          "beginCaptures": { "1": { "name": "storage.modifier.async.ts" } },
+          "begin": "(?:\\b(async)\\s+)?(?=\\([^()]*\\)\\s*(?::[^=]*)?=>)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.modifier.async.js"
+            }
+          },
           "end": "(=>)",
-          "endCaptures": { "1": { "name": "storage.type.function.arrow.ts" } },
-          "name": "meta.arrow.ts",
-          "patterns": [{ "include": "#parameters" }, { "include": "#return-type" }]
+          "endCaptures": {
+            "1": {
+              "name": "storage.type.function.arrow.js"
+            }
+          },
+          "name": "meta.arrow.js",
+          "patterns": [
+            {
+              "include": "#parameters"
+            },
+            {
+              "include": "#return-type"
+            }
+          ]
         }
       ]
     },
     "variable-declaration": {
       "begin": "\\b(?:(export)\\s+)?(?:(declare)\\s+)?(let|const)\\b",
       "beginCaptures": {
-        "1": { "name": "keyword.control.export.ts" },
-        "2": { "name": "storage.modifier.declare.ts" },
-        "3": { "name": "storage.type.ts" }
+        "1": {
+          "name": "keyword.control.export.js"
+        },
+        "2": {
+          "name": "storage.modifier.declare.ts"
+        },
+        "3": {
+          "name": "storage.type.js"
+        }
       },
       "end": "(?=[=;]|\\bin\\b|\\bof\\b|$)",
-      "name": "meta.var.expr.ts",
+      "name": "meta.var.expr.js",
       "patterns": [
-        { "include": "#comments" },
-        { "include": "#type-annotation" },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#type-annotation"
+        },
+        {
+          "match": "([A-Za-z_$][\\w$]*)(?=\\s*=\\s*(?:async\\s+)?(?:fn\\b|function\\b|\\([^()]*\\)\\s*(?::[^=]*)?=>|[A-Za-z_$][\\w$]*\\s*=>))",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.js"
+            }
+          }
+        },
+        {
+          "match": "(?<=\\bconst\\s)\\s*([A-Za-z_$][\\w$]*)",
+          "captures": {
+            "1": {
+              "name": "variable.other.constant.js"
+            }
+          }
+        },
         {
           "begin": "\\{",
-          "beginCaptures": { "0": { "name": "punctuation.definition.binding-pattern.object.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.binding-pattern.object.js"
+            }
+          },
           "end": "\\}",
-          "endCaptures": { "0": { "name": "punctuation.definition.binding-pattern.object.ts" } },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.binding-pattern.object.js"
+            }
+          },
           "patterns": [
-            { "include": "#comments" },
-            { "name": "keyword.operator.rest.ts", "match": "\\.\\.\\." },
-            { "name": "punctuation.separator.comma.ts", "match": "," },
-            { "name": "punctuation.destructuring.ts", "match": ":" },
-            { "name": "variable.other.readwrite.ts", "match": "[A-Za-z_$][\\w$]*" }
+            {
+              "include": "#comments"
+            },
+            {
+              "name": "keyword.operator.rest.js",
+              "match": "\\.\\.\\."
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": ","
+            },
+            {
+              "name": "punctuation.destructuring.js",
+              "match": ":"
+            },
+            {
+              "name": "variable.other.readwrite.js",
+              "match": "[A-Za-z_$][\\w$]*"
+            }
           ]
         },
         {
           "begin": "\\[",
-          "beginCaptures": { "0": { "name": "punctuation.definition.binding-pattern.array.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.binding-pattern.array.js"
+            }
+          },
           "end": "\\]",
-          "endCaptures": { "0": { "name": "punctuation.definition.binding-pattern.array.ts" } },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.binding-pattern.array.js"
+            }
+          },
           "patterns": [
-            { "name": "keyword.operator.rest.ts", "match": "\\.\\.\\." },
-            { "name": "punctuation.separator.comma.ts", "match": "," },
-            { "name": "variable.other.readwrite.ts", "match": "[A-Za-z_$][\\w$]*" }
+            {
+              "name": "keyword.operator.rest.js",
+              "match": "\\.\\.\\."
+            },
+            {
+              "name": "punctuation.separator.comma.js",
+              "match": ","
+            },
+            {
+              "name": "variable.other.readwrite.js",
+              "match": "[A-Za-z_$][\\w$]*"
+            }
           ]
         },
-        { "name": "punctuation.separator.comma.ts", "match": "," },
-        { "name": "variable.other.constant.ts", "match": "\\b[A-Z][A-Z0-9_]+\\b" },
-        { "name": "variable.other.readwrite.ts", "match": "[A-Za-z_$][\\w$]*" }
+        {
+          "name": "punctuation.separator.comma.js",
+          "match": ","
+        },
+        {
+          "name": "variable.other.constant.js",
+          "match": "\\b[A-Z][A-Z0-9_]+\\b"
+        },
+        {
+          "name": "variable.other.readwrite.js",
+          "match": "[A-Za-z_$][\\w$]*"
+        }
       ]
     },
     "keywords": {
       "patterns": [
-        { "name": "keyword.control.conditional.ts", "match": "\\b(if|else)\\b" },
-        { "name": "keyword.control.loop.ts", "match": "\\b(while|for|do)\\b" },
-        { "name": "keyword.control.flow.ts", "match": "\\b(return|break|continue|throw|await|yield)\\b" },
-        { "name": "keyword.control.trycatch.ts", "match": "\\b(try|catch|finally)\\b" },
-        { "name": "keyword.control.switch.ts", "match": "\\b(switch|case)\\b" },
-        { "name": "keyword.control.default.ts", "match": "\\b(default)\\b" },
-        { "name": "keyword.control.import.ts", "match": "\\b(import)\\b" },
-        { "name": "keyword.control.export.ts", "match": "\\b(export)\\b" },
-        { "name": "keyword.control.from.ts", "match": "\\b(from)\\b" },
-        { "name": "keyword.control.as.ts", "match": "\\b(as)\\b" },
-        { "name": "storage.modifier.ts", "match": "\\b(extends|implements|static|readonly)\\b" },
-        { "name": "keyword.operator.expression.of.ts", "match": "\\b(of)\\b" },
-        { "name": "keyword.operator.expression.in.ts", "match": "\\b(in|instanceof)\\b" },
-        { "name": "keyword.operator.expression.typeof.ts", "match": "\\b(typeof|keyof)\\b" },
-        { "name": "keyword.operator.expression.void.ts", "match": "\\b(void)\\b" },
-        { "name": "keyword.operator.expression.delete.ts", "match": "\\b(delete)\\b" },
-        { "name": "storage.modifier.async.ts", "match": "\\b(async)\\b" },
-        { "name": "storage.modifier.declare.ts", "match": "\\b(declare)\\b" },
-        { "name": "storage.type.function.ts", "match": "\\b(fn|function)\\b" },
-        { "name": "storage.type.ts", "match": "\\b(let|const|type|interface)\\b" },
-        { "name": "storage.type.class.ts", "match": "\\b(class|enum)\\b" }
+        {
+          "name": "keyword.control.conditional.js",
+          "match": "\\b(if|else)\\b"
+        },
+        {
+          "name": "keyword.control.loop.js",
+          "match": "\\b(while|for|do)\\b"
+        },
+        {
+          "name": "keyword.control.flow.js",
+          "match": "\\b(return|break|continue|throw|await|yield)\\b"
+        },
+        {
+          "name": "keyword.control.trycatch.js",
+          "match": "\\b(try|catch|finally)\\b"
+        },
+        {
+          "name": "keyword.control.switch.js",
+          "match": "\\b(switch|case)\\b"
+        },
+        {
+          "name": "keyword.control.default.js",
+          "match": "\\b(default)\\b"
+        },
+        {
+          "name": "keyword.control.import.js",
+          "match": "\\b(import)\\b"
+        },
+        {
+          "name": "keyword.control.export.js",
+          "match": "\\b(export)\\b"
+        },
+        {
+          "name": "keyword.control.from.js",
+          "match": "\\b(from)\\b"
+        },
+        {
+          "name": "keyword.control.as.js",
+          "match": "\\b(as)\\b"
+        },
+        {
+          "name": "storage.modifier.js",
+          "match": "\\b(extends|implements|static|readonly)\\b"
+        },
+        {
+          "name": "keyword.operator.expression.of.js",
+          "match": "\\b(of)\\b"
+        },
+        {
+          "name": "keyword.operator.expression.in.js",
+          "match": "\\b(in|instanceof)\\b"
+        },
+        {
+          "name": "keyword.operator.expression.typeof.js",
+          "match": "\\b(typeof|keyof)\\b"
+        },
+        {
+          "name": "keyword.operator.expression.void.js",
+          "match": "\\b(void)\\b"
+        },
+        {
+          "name": "keyword.operator.expression.delete.js",
+          "match": "\\b(delete)\\b"
+        },
+        {
+          "name": "storage.modifier.async.js",
+          "match": "\\b(async)\\b"
+        },
+        {
+          "name": "storage.modifier.declare.ts",
+          "match": "\\b(declare)\\b"
+        },
+        {
+          "name": "storage.type.function.js",
+          "match": "\\b(fn|function)\\b"
+        },
+        {
+          "name": "storage.type.js",
+          "match": "\\b(let|const|type|interface)\\b"
+        },
+        {
+          "name": "storage.type.class.js",
+          "match": "\\b(class|enum)\\b"
+        }
       ]
     },
     "language-constants": {
       "patterns": [
-        { "name": "constant.language.boolean.true.ts", "match": "\\b(true)\\b" },
-        { "name": "constant.language.boolean.false.ts", "match": "\\b(false)\\b" },
-        { "name": "constant.language.null.ts", "match": "\\b(null)\\b" },
-        { "name": "constant.language.undefined.ts", "match": "\\b(undefined)\\b" },
-        { "name": "constant.language.nan.ts", "match": "\\b(NaN)\\b" },
-        { "name": "constant.language.infinity.ts", "match": "\\b(Infinity)\\b" },
-        { "name": "variable.language.this.ts", "match": "\\b(this)\\b" },
-        { "name": "variable.language.super.ts", "match": "\\b(super)\\b" },
-        { "name": "variable.language.arguments.ts", "match": "\\b(arguments)\\b" }
+        {
+          "name": "constant.language.boolean.true.js",
+          "match": "\\b(true)\\b"
+        },
+        {
+          "name": "constant.language.boolean.false.js",
+          "match": "\\b(false)\\b"
+        },
+        {
+          "name": "constant.language.null.js",
+          "match": "\\b(null)\\b"
+        },
+        {
+          "name": "constant.language.undefined.js",
+          "match": "\\b(undefined)\\b"
+        },
+        {
+          "name": "constant.language.nan.js",
+          "match": "\\b(NaN)\\b"
+        },
+        {
+          "name": "constant.language.infinity.js",
+          "match": "\\b(Infinity)\\b"
+        },
+        {
+          "name": "variable.language.this.js",
+          "match": "\\b(this)\\b"
+        },
+        {
+          "name": "variable.language.super.js",
+          "match": "\\b(super)\\b"
+        },
+        {
+          "name": "variable.language.arguments.js",
+          "match": "\\b(arguments)\\b"
+        }
       ]
     },
     "numbers": {
       "patterns": [
-        { "name": "constant.numeric.hex.ts", "match": "\\b0[xX][0-9a-fA-F_]+\\b" },
-        { "name": "constant.numeric.binary.ts", "match": "\\b0[bB][01_]+\\b" },
-        { "name": "constant.numeric.octal.ts", "match": "\\b0[oO][0-7_]+\\b" },
-        { "name": "constant.numeric.decimal.ts", "match": "(?<![\\w$])(?:\\d[\\d_]*\\.?[\\d_]*|\\.\\d[\\d_]*)(?:[eE][+-]?\\d+)?\\b" }
+        {
+          "name": "constant.numeric.hex.js",
+          "match": "\\b0[xX][0-9a-fA-F_]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.js",
+          "match": "\\b0[bB][01_]+\\b"
+        },
+        {
+          "name": "constant.numeric.octal.js",
+          "match": "\\b0[oO][0-7_]+\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.js",
+          "match": "(?<![\\w$])(?:\\d[\\d_]*\\.?[\\d_]*|\\.\\d[\\d_]*)(?:[eE][+-]?\\d+)?\\b"
+        }
       ]
     },
     "strings": {
       "patterns": [
         {
-          "name": "string.quoted.double.ts",
+          "name": "string.quoted.double.js",
           "begin": "\"",
-          "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.js"
+            }
+          },
           "end": "\"",
-          "endCaptures": { "0": { "name": "punctuation.definition.string.end.ts" } },
-          "patterns": [{ "include": "#string-escape" }]
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.js"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#string-escape"
+            }
+          ]
         },
         {
-          "name": "string.quoted.single.ts",
+          "name": "string.quoted.single.js",
           "begin": "'",
-          "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.js"
+            }
+          },
           "end": "'",
-          "endCaptures": { "0": { "name": "punctuation.definition.string.end.ts" } },
-          "patterns": [{ "include": "#string-escape" }]
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.js"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#string-escape"
+            }
+          ]
         }
       ]
     },
     "string-escape": {
-      "name": "constant.character.escape.ts",
+      "name": "constant.character.escape.js",
       "match": "\\\\(x[0-9a-fA-F]{2}|u\\{[0-9a-fA-F]+\\}|u[0-9a-fA-F]{4}|.)"
     },
     "template": {
-      "name": "string.template.ts",
+      "name": "string.template.js",
       "begin": "`",
-      "beginCaptures": { "0": { "name": "punctuation.definition.string.template.begin.ts" } },
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.template.begin.js"
+        }
+      },
       "end": "`",
-      "endCaptures": { "0": { "name": "punctuation.definition.string.template.end.ts" } },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.template.end.js"
+        }
+      },
       "patterns": [
-        { "include": "#string-escape" },
         {
-          "name": "meta.template.expression.ts",
+          "include": "#string-escape"
+        },
+        {
+          "name": "meta.template.expression.js",
           "begin": "\\$\\{",
-          "beginCaptures": { "0": { "name": "punctuation.definition.template-expression.begin.ts" } },
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.template-expression.begin.js"
+            }
+          },
           "end": "\\}",
-          "endCaptures": { "0": { "name": "punctuation.definition.template-expression.end.ts" } },
-          "contentName": "meta.embedded.line.ts",
-          "patterns": [{ "include": "#expression" }]
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.template-expression.end.js"
+            }
+          },
+          "contentName": "meta.embedded.line.js",
+          "patterns": [
+            {
+              "include": "#expression"
+            }
+          ]
         }
       ]
     },
     "regex": {
-      "name": "string.regexp.ts",
+      "name": "string.regexp.js",
       "begin": "(?<=^|[=(,:\\[!&|?{};]|\\breturn|\\btypeof|=>)\\s*(/)(?![/*])(?=(?:[^/\\\\\\[\\n]|\\\\.|\\[(?:[^\\]\\\\\\n]|\\\\.)*\\])+/[dgimsuyv]*)",
-      "beginCaptures": { "1": { "name": "punctuation.definition.string.begin.ts" } },
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.begin.js"
+        }
+      },
       "end": "(/)([dgimsuyv]*)",
       "endCaptures": {
-        "1": { "name": "punctuation.definition.string.end.ts" },
-        "2": { "name": "keyword.other.ts" }
+        "1": {
+          "name": "punctuation.definition.string.end.js"
+        },
+        "2": {
+          "name": "keyword.other.js"
+        }
       },
       "patterns": [
-        { "name": "constant.character.escape.backslash.regexp", "match": "\\\\." },
+        {
+          "name": "constant.character.escape.backslash.regexp",
+          "match": "\\\\."
+        },
         {
           "name": "constant.other.character-class.set.regexp",
           "begin": "\\[",
           "end": "\\]",
-          "patterns": [{ "name": "constant.character.escape.backslash.regexp", "match": "\\\\." }]
+          "patterns": [
+            {
+              "name": "constant.character.escape.backslash.regexp",
+              "match": "\\\\."
+            }
+          ]
         },
-        { "name": "keyword.operator.quantifier.regexp", "match": "[*+?]\\??|\\{\\d+(,\\d*)?\\}" },
-        { "name": "keyword.operator.or.regexp", "match": "\\|" },
-        { "name": "keyword.control.anchor.regexp", "match": "[\\^$]" },
-        { "name": "punctuation.definition.group.regexp", "match": "[()]" }
+        {
+          "name": "keyword.operator.quantifier.regexp",
+          "match": "[*+?]\\??|\\{\\d+(,\\d*)?\\}"
+        },
+        {
+          "name": "keyword.operator.or.regexp",
+          "match": "\\|"
+        },
+        {
+          "name": "keyword.control.anchor.regexp",
+          "match": "[\\^$]"
+        },
+        {
+          "name": "punctuation.definition.group.regexp",
+          "match": "[()]"
+        }
       ]
     },
     "jsx": {
@@ -453,77 +1084,156 @@
           "name": "meta.tag.tsx",
           "begin": "(<)(>)",
           "beginCaptures": {
-            "1": { "name": "punctuation.definition.tag.begin.tsx" },
-            "2": { "name": "punctuation.definition.tag.end.tsx" }
+            "1": {
+              "name": "punctuation.definition.tag.begin.tsx"
+            },
+            "2": {
+              "name": "punctuation.definition.tag.end.tsx"
+            }
           },
           "end": "(</)(>)",
           "endCaptures": {
-            "1": { "name": "punctuation.definition.tag.begin.tsx" },
-            "2": { "name": "punctuation.definition.tag.end.tsx" }
+            "1": {
+              "name": "punctuation.definition.tag.begin.tsx"
+            },
+            "2": {
+              "name": "punctuation.definition.tag.end.tsx"
+            }
           },
-          "patterns": [{ "include": "#jsx-children" }]
+          "patterns": [
+            {
+              "include": "#jsx-children"
+            }
+          ]
         },
         {
           "name": "meta.tag.tsx",
           "begin": "(?<![\\w$)\\]])(<)(?=[A-Za-z_$])",
-          "beginCaptures": { "1": { "name": "punctuation.definition.tag.begin.tsx" } },
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.tsx"
+            }
+          },
           "end": "(/?>)",
-          "endCaptures": { "1": { "name": "punctuation.definition.tag.end.tsx" } },
-          "patterns": [{ "include": "#jsx-tag-name" }, { "include": "#jsx-attributes" }]
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.end.tsx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#jsx-tag-name"
+            },
+            {
+              "include": "#jsx-attributes"
+            }
+          ]
         },
         {
           "name": "meta.tag.tsx",
           "begin": "(</)",
-          "beginCaptures": { "1": { "name": "punctuation.definition.tag.begin.tsx" } },
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.tsx"
+            }
+          },
           "end": "(>)",
-          "endCaptures": { "1": { "name": "punctuation.definition.tag.end.tsx" } },
-          "patterns": [{ "include": "#jsx-tag-name" }]
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.end.tsx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#jsx-tag-name"
+            }
+          ]
         }
       ]
     },
     "jsx-tag-name": {
       "patterns": [
-        { "name": "support.class.component.tsx", "match": "\\G[A-Z][\\w$.-]*" },
-        { "name": "entity.name.tag.tsx", "match": "\\G[a-z_$][\\w$.:-]*" }
+        {
+          "name": "support.class.component.tsx",
+          "match": "\\G[A-Z][\\w$.-]*"
+        },
+        {
+          "name": "entity.name.tag.tsx",
+          "match": "\\G[a-z_$][\\w$.:-]*"
+        }
       ]
     },
     "jsx-attributes": {
       "patterns": [
-        { "include": "#comments" },
+        {
+          "include": "#comments"
+        },
         {
           "match": "([A-Za-z_$][\\w$:.-]*)\\s*(=)?",
           "captures": {
-            "1": { "name": "entity.other.attribute-name.tsx" },
-            "2": { "name": "keyword.operator.assignment.tsx" }
+            "1": {
+              "name": "entity.other.attribute-name.tsx"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.tsx"
+            }
           }
         },
-        { "include": "#strings" },
-        { "include": "#jsx-expr" }
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#jsx-expr"
+        }
       ]
     },
     "jsx-children": {
       "patterns": [
-        { "include": "#jsx-expr" },
-        { "include": "#jsx" },
-        { "name": "constant.character.entity.tsx", "match": "&[A-Za-z0-9#]+;" }
+        {
+          "include": "#jsx-expr"
+        },
+        {
+          "include": "#jsx"
+        },
+        {
+          "name": "constant.character.entity.tsx",
+          "match": "&[A-Za-z0-9#]+;"
+        }
       ]
     },
     "jsx-expr": {
       "name": "meta.embedded.expression.tsx",
       "begin": "\\{",
-      "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.tsx" } },
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.begin.tsx"
+        }
+      },
       "end": "\\}",
-      "endCaptures": { "0": { "name": "punctuation.section.embedded.end.tsx" } },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.end.tsx"
+        }
+      },
       "patterns": [
-        { "name": "keyword.operator.spread.ts", "match": "\\.\\.\\." },
-        { "include": "#expression" }
+        {
+          "name": "keyword.operator.spread.js",
+          "match": "\\.\\.\\."
+        },
+        {
+          "include": "#expression"
+        }
       ]
     },
     "new-expression": {
       "match": "\\b(new)\\s+([A-Za-z_$][\\w$]*(?:\\.[A-Za-z_$][\\w$]*)*)",
       "captures": {
-        "1": { "name": "keyword.operator.new.ts" },
-        "2": { "name": "entity.name.type.ts" }
+        "1": {
+          "name": "keyword.operator.new.js"
+        },
+        "2": {
+          "name": "entity.name.type.ts"
+        }
       }
     },
     "property-access": {
@@ -531,22 +1241,34 @@
         {
           "match": "(\\?\\.|\\.)\\s*([A-Za-z_$][\\w$]*)\\s*(?=\\()",
           "captures": {
-            "1": { "name": "punctuation.accessor.ts" },
-            "2": { "name": "entity.name.function.member.ts" }
+            "1": {
+              "name": "punctuation.accessor.js"
+            },
+            "2": {
+              "name": "entity.name.function.js"
+            }
           }
         },
         {
           "match": "(\\?\\.|\\.)\\s*([A-Z][A-Z0-9_]*)\\b(?![\\w$])",
           "captures": {
-            "1": { "name": "punctuation.accessor.ts" },
-            "2": { "name": "variable.other.constant.property.ts" }
+            "1": {
+              "name": "punctuation.accessor.js"
+            },
+            "2": {
+              "name": "variable.other.constant.property.js"
+            }
           }
         },
         {
           "match": "(\\?\\.|\\.)\\s*([A-Za-z_$][\\w$]*)",
           "captures": {
-            "1": { "name": "punctuation.accessor.ts" },
-            "2": { "name": "variable.other.property.ts" }
+            "1": {
+              "name": "punctuation.accessor.js"
+            },
+            "2": {
+              "name": "variable.other.property.js"
+            }
           }
         }
       ]
@@ -556,19 +1278,35 @@
         {
           "match": "(?<=[{,]|^)\\s*([A-Za-z_$][\\w$]*)\\s*(:)(?!:)",
           "captures": {
-            "1": { "name": "meta.object-literal.key.ts" },
-            "2": { "name": "punctuation.separator.key-value.ts" }
+            "1": {
+              "name": "meta.object-literal.key.js"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.js"
+            }
           }
         },
         {
           "match": "(?<=[{,]|^)\\s*((\")[^\"]*(\")|(')[^']*('))\\s*(:)(?!:)",
           "captures": {
-            "1": { "name": "meta.object-literal.key.ts string.quoted.ts" },
-            "2": { "name": "punctuation.definition.string.begin.ts" },
-            "3": { "name": "punctuation.definition.string.end.ts" },
-            "4": { "name": "punctuation.definition.string.begin.ts" },
-            "5": { "name": "punctuation.definition.string.end.ts" },
-            "6": { "name": "punctuation.separator.key-value.ts" }
+            "1": {
+              "name": "meta.object-literal.key.ts string.quoted.js"
+            },
+            "2": {
+              "name": "punctuation.definition.string.begin.js"
+            },
+            "3": {
+              "name": "punctuation.definition.string.end.js"
+            },
+            "4": {
+              "name": "punctuation.definition.string.begin.js"
+            },
+            "5": {
+              "name": "punctuation.definition.string.end.js"
+            },
+            "6": {
+              "name": "punctuation.separator.key-value.js"
+            }
           }
         }
       ]
@@ -577,50 +1315,124 @@
       "patterns": [
         {
           "match": "\\b([A-Z][\\w$]*)\\s*(?=\\()",
-          "captures": { "1": { "name": "entity.name.function.ts support.class.ts" } }
+          "captures": {
+            "1": {
+              "name": "entity.name.function.ts support.class.js"
+            }
+          }
         },
         {
           "match": "\\b([A-Za-z_$][\\w$]*)\\s*(?=\\()",
-          "captures": { "1": { "name": "entity.name.function.ts" } }
+          "captures": {
+            "1": {
+              "name": "entity.name.function.js"
+            }
+          }
         }
       ]
     },
     "operators": {
       "patterns": [
-        { "name": "keyword.operator.spread.ts", "match": "\\.\\.\\." },
-        { "name": "keyword.operator.arrow.ts", "match": "=>" },
-        { "name": "keyword.operator.comparison.ts", "match": "===|!==|==|!=|<=|>=" },
-        { "name": "keyword.operator.logical.ts", "match": "&&|\\|\\||\\?\\?|!" },
-        { "name": "keyword.operator.assignment.compound.ts", "match": "\\*\\*=|[-+*/%]=|<<=|>>>?=|&&=|\\|\\|=|\\?\\?=|[&|^]=" },
-        { "name": "keyword.operator.increment.ts", "match": "\\+\\+|--" },
-        { "name": "keyword.operator.arithmetic.ts", "match": "\\*\\*|[-+*/%]" },
-        { "name": "keyword.operator.bitwise.shift.ts", "match": "<<|>>>?" },
-        { "name": "keyword.operator.bitwise.ts", "match": "[&|^~]" },
-        { "name": "keyword.operator.relational.ts", "match": "[<>]" },
-        { "name": "keyword.operator.assignment.ts", "match": "=" },
-        { "name": "keyword.operator.ternary.ts", "match": "\\?|:" }
+        {
+          "name": "keyword.operator.spread.js",
+          "match": "\\.\\.\\."
+        },
+        {
+          "name": "keyword.operator.arrow.js",
+          "match": "=>"
+        },
+        {
+          "name": "keyword.operator.comparison.js",
+          "match": "===|!==|==|!=|<=|>="
+        },
+        {
+          "name": "keyword.operator.logical.js",
+          "match": "&&|\\|\\||\\?\\?|!"
+        },
+        {
+          "name": "keyword.operator.assignment.compound.js",
+          "match": "\\*\\*=|[-+*/%]=|<<=|>>>?=|&&=|\\|\\|=|\\?\\?=|[&|^]="
+        },
+        {
+          "name": "keyword.operator.increment.js",
+          "match": "\\+\\+|--"
+        },
+        {
+          "name": "keyword.operator.arithmetic.js",
+          "match": "\\*\\*|[-+*/%]"
+        },
+        {
+          "name": "keyword.operator.bitwise.shift.js",
+          "match": "<<|>>>?"
+        },
+        {
+          "name": "keyword.operator.bitwise.js",
+          "match": "[&|^~]"
+        },
+        {
+          "name": "keyword.operator.relational.js",
+          "match": "[<>]"
+        },
+        {
+          "name": "keyword.operator.assignment.js",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.ternary.js",
+          "match": "\\?|:"
+        }
       ]
     },
     "brackets": {
       "patterns": [
-        { "name": "punctuation.definition.block.ts", "match": "[{}]" },
-        { "name": "meta.brace.round.ts", "match": "[()]" },
-        { "name": "meta.brace.square.ts", "match": "[\\[\\]]" }
+        {
+          "name": "punctuation.definition.block.js",
+          "match": "[{}]"
+        },
+        {
+          "name": "meta.brace.round.js",
+          "match": "[()]"
+        },
+        {
+          "name": "meta.brace.square.js",
+          "match": "[\\[\\]]"
+        }
       ]
     },
     "punctuation": {
       "patterns": [
-        { "name": "punctuation.terminator.statement.ts", "match": ";" },
-        { "name": "punctuation.separator.comma.ts", "match": "," }
+        {
+          "name": "punctuation.terminator.statement.js",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.separator.comma.js",
+          "match": ","
+        }
       ]
     },
     "identifiers": {
       "patterns": [
-        { "name": "support.class.builtin.ts", "match": "\\b(Math|JSON|Promise|Object|Array|String|Number|Boolean|Date|RegExp|Error|Map|Set|Symbol|console|process|globalThis|window|document)\\b" },
-        { "name": "variable.other.constant.ts", "match": "\\b[A-Z][A-Z0-9_]+\\b" },
-        { "name": "variable.other.object.ts", "match": "\\b[A-Za-z_$][\\w$]*(?=\\s*(?:\\?\\.|\\.))" },
-        { "name": "support.class.ts", "match": "\\b[A-Z][\\w$]*\\b" },
-        { "name": "variable.other.readwrite.ts", "match": "\\b[A-Za-z_$][\\w$]*\\b" }
+        {
+          "name": "support.class.builtin.js",
+          "match": "\\b(Math|JSON|Promise|Object|Array|String|Number|Boolean|Date|RegExp|Error|Map|Set|Symbol|console|process|globalThis|window|document)\\b"
+        },
+        {
+          "name": "variable.other.constant.js",
+          "match": "\\b[A-Z][A-Z0-9_]+\\b"
+        },
+        {
+          "name": "variable.other.object.js",
+          "match": "\\b[A-Za-z_$][\\w$]*(?=\\s*(?:\\?\\.|\\.))"
+        },
+        {
+          "name": "support.class.js",
+          "match": "\\b[A-Z][\\w$]*\\b"
+        },
+        {
+          "name": "variable.other.readwrite.js",
+          "match": "\\b[A-Za-z_$][\\w$]*\\b"
+        }
       ]
     }
   }
