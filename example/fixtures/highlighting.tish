@@ -1,0 +1,34 @@
+import { PageHeader, Card, Pager, Tag } from "./ui.tish"
+
+let PAGE_SIZE = 12
+let SPIRITS = ["whiskey", "gin", "rum", "tequila", "vodka", "mixer", "coffee", "maitai"]
+
+/** Compute the static paths for a collection. */
+export fn pagePaths(ctx, coll) {
+  let pages = Math.ceil(ctx.collections[coll].length / PAGE_SIZE)
+  let out = []
+  let n = 2
+  while (n <= pages) { out.push({ params: { n: String(n) } }); n = n + 1 }
+  return out
+}
+
+type Options = { title: string, intro?: string, tags: string[] }
+
+export async fn listing(ctx, coll: string, n: number, opts: Options): Promise<any> {
+  let items = ctx.collections[coll]
+  let spirit = "spirit" in ctx.query ? ctx.query.spirit : null
+  let pg = ctx.paginate(items, PAGE_SIZE, n)
+  let re = /^[a-z]+\/(\d+)$/gi
+  let msg = `page ${n} of ${pg.total} (${items.length})` // trailing comment
+  let half = 0.5 * n + 0x1F - 1e3
+  let handler = async (e) => { await ctx.log(e?.message ?? 'none') }
+  return (
+    <div>
+      <PageHeader title={opts.title} intro={opts.intro} />
+      {coll === "drink" ? <div class="flex flex-wrap gap-2 mb-8">{SPIRITS.map(s => <a href={"/" + s}>{s}</a>)}</div> : null}
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">{pg.items.map(it => <Card item={it} {...opts} />)}</div>
+      <Pager page={pg} base={"/" + coll + "/"} />
+      <></>
+    </div>
+  )
+}
