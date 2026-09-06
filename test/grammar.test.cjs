@@ -90,7 +90,7 @@ test("fixture tokenizes into fine-grained scopes", async () => {
 
   // member call + builtin object + property
   assert.ok(has(tokens, "Math", 8, "support.class.builtin"));
-  assert.ok(has(tokens, "ceil", 8, "entity.name.function.member"));
+  assert.ok(has(tokens, "ceil", 8, "entity.name.function"));
   assert.ok(has(tokens, "length", 8, "variable.other.property"));
   assert.ok(has(tokens, "/", 8, "keyword.operator.arithmetic"));
 
@@ -139,7 +139,7 @@ test("fixture tokenizes into fine-grained scopes", async () => {
   assert.ok(has(tokens, "title", 27, "entity.other.attribute-name"));
   assert.ok(has(tokens, "flex flex-wrap gap-2 mb-8", 28, "string.quoted.double"));
   assert.ok(has(tokens, "===", 28, "keyword.operator.comparison"));
-  assert.ok(has(tokens, "map", 28, "entity.name.function.member"));
+  assert.ok(has(tokens, "map", 28, "entity.name.function"));
   assert.ok(has(tokens, "...", 29, "keyword.operator.spread"));
   assert.ok(has(tokens, "<", 31, "meta.tag"));
   assert.ok(has(tokens, "</", 32, "punctuation.definition.tag.begin"));
