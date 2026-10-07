@@ -4,7 +4,7 @@
   "description": "Language support for Tish (including JSX in .tish) — syntax highlighting, snippets, tasks; bundled tish-lsp language server (no download, no compiler required)",
   "version": "0.2.0",
   "publisher": "tish",
-  "license": "PIF",
+  "license": "MIT",
   "icon": "icon.png",
   "repository": {
     "type": "git",
